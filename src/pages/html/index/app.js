@@ -3,6 +3,8 @@ import Vue from 'vue';
 import vTap from 'v-tap';
 Vue.use(vTap); //添加vue tap事件
 
+import  'public/hotcss'
+
 import Vant from 'vant';
 import 'vant/lib/vant-css/index.css';
 Vue.use(Vant);
