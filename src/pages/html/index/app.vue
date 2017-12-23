@@ -1,13 +1,9 @@
 <template>
     <div class="td-app">
-        <van-nav-bar title="xx电台" leftText="返回" leftArrow>
-            <span slot="right" class="live-button">
-                Live
-            </span>
-        </van-nav-bar>
-
-
-        <van-tabbar v-model="active">
+      <keep-alive>
+          <router-view></router-view>
+      </keep-alive>
+        <van-tabbar v-model="active" @change="onChangeTab">
             <van-tabbar-item v-for="n in tabs" icon="shop">
                  <span>{{n.name}}</span>
                     <template slot="icon" slot-scope="props">
@@ -20,9 +16,14 @@
 <style lang="sass"  >
 
 @import "../../../public/px2rem.scss";
-
+html,body{
+  height:100%;
+  width:100%;
+  background-color:#fefefe;
+}
 .td-app {
     font-family: "PingFang SC";
+
     .van-nav-bar{
         height: px2rem(88);
         .van-nav-bar__title,.van-nav-bar__right,.van-nav-bar__left{
@@ -35,7 +36,6 @@
         .van-nav-bar__right,.van-nav-bar__left{
             font-weight: 200;
         }
-
         .live-button{
             height: px2rem(56);
             line-height: px2rem(56);
@@ -78,27 +78,36 @@
                 tabs: [
                     {
                         name:'互动',
+                        url:'/',
                         active:require('../../../assets/images/ico_toolbar_target_sel.png'),
                         un_active:require('../../../assets/images/ico_toolbar_target.png'),
                     },
                     {
                         name:'私人FM',
+                        url:'/fm',
                         active:require('../../../assets/images/ico_toolbar_FM_sel.png'),
                         un_active:require('../../../assets/images/ico_toolbar_FM.png'),
                     },
                     {
                         name:'直播',
+                        url:'/live',
                          active:require('../../../assets/images/ico_toolbar_live_sel.png'),
                         un_active:require('../../../assets/images/ico_toolbar_live.png'),
                     },
                     {
                         name:'我的',
+                        url:'/my',
                          active:require('../../../assets/images/ico_toolbar_my_sel.png'),
                         un_active:require('../../../assets/images/ico_toolbar_my.png'),
                     }
                 ],
                 active:0
             }
+        },
+        methods:{
+          onChangeTab(active){
+            this.$router.replace(this.tabs[active].url)
+          }
         },
         created() {
             // this.ver = api.version;
