@@ -5,6 +5,7 @@ const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+const autoprefixer = require('autoprefixer');
 
 let entries = {};
 let chunks = [];
@@ -40,6 +41,13 @@ let config = {
                 use: [
                     {
                         loader:'vue-loader',
+                        options: {
+                            preserveWhitespace: false,
+                            postcss: [autoprefixer({browsers: ['last 7 versions']})],
+                            loaders: {
+                                'js': 'babel-loader?presets[]=es2015'
+                            }
+                        }
                     }
                 ]
             },

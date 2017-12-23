@@ -16,13 +16,28 @@
 <style lang="sass" type="text/scss"  >
 
 @import "../../../public/px2rem.scss";
-html,body{
+html,body,.td-app{
   height:100%;
   width:100%;
   background-color:#fefefe;
+    p{
+        margin: 0;
+        padding: 0;
+    }
 }
 .td-app {
+    *{
+        box-sizing: border-box;
+    }
     font-family: "PingFang SC";
+
+    .van-hairline--top-bottom::after{
+        border-width: px2rem(2) 0;
+    }
+
+    .van-pull-refresh__head{
+        font-size: px2rem(28);
+    }
 
     .van-nav-bar{
         height: px2rem(88);
@@ -50,6 +65,7 @@ html,body{
 
     .van-tabbar {
         height: px2rem(98);
+        background-color: rgba(255, 255, 255, 0.95);
         .van-tabbar-item__icon{
             margin-bottom: 0;
                 img{

@@ -5,6 +5,8 @@ import VueRouter from 'vue-router';
 import routes from './router';
 import 'swiper/dist/css/swiper.css'
 
+import './tools';
+
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 
 Vue.use(VueAwesomeSwiper)
