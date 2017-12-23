@@ -3,6 +3,11 @@ import Vue from 'vue';
 import vTap from 'v-tap';
 import VueRouter from 'vue-router';
 import routes from './router';
+import 'swiper/dist/css/swiper.css'
+
+import VueAwesomeSwiper from 'vue-awesome-swiper'
+
+Vue.use(VueAwesomeSwiper)
 
 Vue.use(VueRouter);
 const router = new VueRouter({

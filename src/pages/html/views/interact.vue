@@ -30,9 +30,12 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang="sass"  type="text/scss">
   @import "../../../public/px2rem.scss";
   .view-interact{
+      .van-hairline--top-bottom::after{
+          border-width: 0;
+      }
     .main{
       position:relative;
     }
@@ -46,7 +49,7 @@ export default {
     }
     .player-block{
       position:absolute;
-      top:px2rem(80);
+      top:px2rem(56);
       left:px2rem(40);
       right:px2rem(40);
       height:px2rem(448);

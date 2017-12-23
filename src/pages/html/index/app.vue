@@ -13,7 +13,7 @@
         </van-tabbar>
     </div>
 </template>
-<style lang="sass"  >
+<style lang="sass" type="text/scss"  >
 
 @import "../../../public/px2rem.scss";
 html,body{
@@ -26,6 +26,8 @@ html,body{
 
     .van-nav-bar{
         height: px2rem(88);
+        background-color: transparent;
+
         .van-nav-bar__title,.van-nav-bar__right,.van-nav-bar__left{
             height: px2rem(88);
             line-height: px2rem(88);
