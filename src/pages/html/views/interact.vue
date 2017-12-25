@@ -34,7 +34,7 @@
             </section>
 
             <section class="voice-block">
-                <div class="voice-circle"></div>
+                <div class="voice-circle" @click="onSpeech"></div>
                 <span class="voice-tag">
                     字
                 </span>
@@ -48,7 +48,23 @@
 <script>
     export default {
 
-
+        methods:{
+            onSpeech(){
+                alert("开始说话");
+                var speechRecognizer = api.require('speechRecognizer');
+                speechRecognizer.addRecordHUD({
+                    centerX: 160,
+                    centerY: 120,
+                    radius: 80,
+                    transparentR: 40,
+                    bg: '#AAAAAA',
+                    fixedOn: api.frameName,
+                    fixed: false
+                }, function(ret, err) {
+                    var volume = ret.volume;
+                });
+            }
+        }
     }
 </script>
 

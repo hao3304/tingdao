@@ -36,7 +36,7 @@
                         <a href="#" @click="onPlayer">播放</a>
                     </li>
                     <li>
-                        <a href="#" >
+                        <a href="#" class="player-btn" >
                             <img src="../../../assets/images/player_btn.png" alt="">
                         </a>
                     </li>
@@ -165,6 +165,14 @@
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    li {
+                        .player-btn{
+                            img{
+                                width: px2rem(120);
+                                height: px2rem(120);
+                            }
+                        }
+                    }
                 }
             }
         }

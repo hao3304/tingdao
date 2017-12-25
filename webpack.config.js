@@ -45,7 +45,11 @@ let config = {
                             preserveWhitespace: false,
                             postcss: [autoprefixer({browsers: ['last 7 versions']})],
                             loaders: {
-                                'js': 'babel-loader?presets[]=es2015'
+                                'js': 'babel-loader?presets[]=es2015',
+                                css: ExtractTextPlugin.extract({
+                                    fallback: 'style-loader',
+                                    use: 'css-loader'
+                                })
                             }
                         }
                     }
