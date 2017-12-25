@@ -50,18 +50,23 @@
 
         methods:{
             onSpeech(){
-                alert("开始说话");
-                var speechRecognizer = api.require('speechRecognizer');
-                speechRecognizer.addRecordHUD({
-                    centerX: 160,
-                    centerY: 120,
-                    radius: 80,
-                    transparentR: 40,
-                    bg: '#AAAAAA',
-                    fixedOn: api.frameName,
-                    fixed: false
-                }, function(ret, err) {
-                    var volume = ret.volume;
+                var obj = api.require('speechRecognizer');
+                api.toast({
+                    msg : "语音识别开始，请说话",
+                    duration : 1000,
+                    location : "middle"
+                });
+
+                obj.record({
+                },function(ret,err){
+                    if(ret.status){
+                        // ret.wordStr;
+                        api.alert({
+                            title : "识别结果",
+                            msg : ret.wordStr
+                        })
+                        obj.cancelRecord();
+                    }
                 });
             }
         }

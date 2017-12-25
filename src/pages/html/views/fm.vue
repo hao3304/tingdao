@@ -79,7 +79,7 @@
               var audio = api.require('audio');
               var self = this;
               audio.play({
-                  path: 'http://6007.live-vod.cdn.aodianyun.com/m3u8/0x0/Vting.stream.1446540844/Vting.stream.1446540844.m3u8'
+                  path: 'http://lhttp.qingting.fm/live/1163/64k.mp3'
               }, function(ret, err) {
                     self.info.duration = new Date(ret.duration*1000).Format('mm:ss');
                     self.info.current = new Date(ret.current*1000).Format('mm:ss');
