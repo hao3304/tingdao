@@ -153,7 +153,7 @@
             color: #ddd;
         }
         .van-cell__value--link{
-            padding-right: px2rem(50);
+            padding-right: px2rem(60);
         }
         .van-cell__value{
             font-size: px2rem(28);

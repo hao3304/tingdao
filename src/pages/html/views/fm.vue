@@ -9,10 +9,10 @@
                     <div class="content">
                         <div class="toolbar">
                             <a href="#">
-                                <van-icon name="like-o" />
+                                <img src="../../../assets/images/ico_like@3x.png" alt="">
                             </a>
                             <a href="#">
-                                <van-icon name="delete"></van-icon>
+                                <img src="../../../assets/images/ico_del_W@3x.png" alt="">
                             </a>
                         </div>
                         <div class="time">
@@ -33,7 +33,9 @@
                 </p>
                 <ul>
                     <li>
-                        <a href="#" @click="onPlayer">播放</a>
+                        <a href="#" @click="onPlayer" class="tools-back">
+                            <img src="../../../assets/images/tools_back@3x.png" alt="">
+                        </a>
                     </li>
                     <li>
                         <a href="#" class="player-btn" >
@@ -41,7 +43,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" @click="onPause">暂停</a>
+                        <a href="#" @click="onPlayer" class="tools-next">
+                        <img src="../../../assets/images/tools_next@3x.png" alt="">
+                        </a>
                     </li>
                 </ul>
 
@@ -120,8 +124,9 @@
                 display: flex;
                 justify-content: space-between;
                 a{
-                    color: #fff;
-                    font-size: px2rem(39);
+                    img{
+                        width: px2rem(60);
+                    }
                 }
             }
 
@@ -172,6 +177,12 @@
                                 height: px2rem(120);
                             }
                         }
+                        .tools-next,.tools-back{
+                            img{
+                                width: px2rem(50);
+                            }
+                        }
+
                     }
                 }
             }

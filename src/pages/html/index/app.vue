@@ -14,7 +14,19 @@
     </div>
 </template>
 <style lang="sass" type="text/scss"  >
-
+  @media screen and (min-width: 320px){html{font-size: 20px;}}
+  @media screen and (min-width: 360px){html{font-size: 22.5px;}}
+  @media screen and (min-width: 375px){html{font-size: 23.4375px;}}
+  @media screen and (min-width: 412px){html{font-size: 25.75px;}}
+  @media screen and (min-width: 414px){html{font-size: 25.75px;}}
+  @media screen and (min-width: 480px){html{font-size: 30px;}}
+  @media screen and (min-width: 540px){html{font-size: 33.75px;}}
+  @media screen and (min-width: 640px){html{font-size: 40px;}}
+  @media screen and (min-width: 720px){html{font-size: 45px;}}
+  @media screen and (min-width: 768px){html{font-size: 48px;}}
+  @media screen and (min-width: 1080px){html{font-size: 67.5px;}}
+  @media screen and (min-width: 1440px){html{font-size: 90px;}}
+  @media screen and (min-width: 2160px){html{font-size: 135px;}}
 @import "../../../public/px2rem.scss";
 html,body,.td-app{
   height:100%;
