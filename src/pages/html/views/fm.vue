@@ -33,17 +33,17 @@
                 </p>
                 <ul>
                     <li>
-                        <a href="#" @click="onPlayer" class="tools-back">
+                        <a href="#"  v-ripple  class="tools-back">
                             <img src="../../../assets/images/tools_back@3x.png" alt="">
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="player-btn" >
-                            <img src="../../../assets/images/player_btn.png" alt="">
+                        <a v-ripple href="#" class="player-btn"  @click="onPlayer" >
+                            <img :src="play_src" alt="">
                         </a>
                     </li>
                     <li>
-                        <a href="#" @click="onPlayer" class="tools-next">
+                        <a href="#"  v-ripple  class="tools-next">
                         <img src="../../../assets/images/tools_next@3x.png" alt="">
                         </a>
                     </li>
@@ -75,29 +75,37 @@
                     duration:'00:11',
                     current:'22:22',
                     complete:true
-                }
+                },
+                playing:false
             }
         },
+
         methods:{
           onPlayer(){
               var audio = api.require('audio');
-              var self = this;
-              audio.play({
-                  path: 'http://lhttp.qingting.fm/live/1163/64k.mp3'
-              }, function(ret, err) {
-                    self.info.duration = new Date(ret.duration*1000).Format('mm:ss');
-                    self.info.current = new Date(ret.current*1000).Format('mm:ss');
+              if(this.playing) {
+                  audio.stop();
+              }else{
+                  var self = this;
+                  audio.play({
+                      path: 'http://living.muzhifm.com/muzhifm/hangzhou_xihuzs_1054.m3u8?auth_key=1604286295-0-0-d3614ac1992b1af4adbf9afab35be2c9'
+                  }, function(ret, err) {
+                      self.info.duration = new Date(ret.duration*1000).Format('mm:ss');
+                      self.info.current = new Date(ret.current*1000).Format('mm:ss');
+                  });
 
-              });
-          },
-            onPause(){
-              let audio = api.require('audio');
-                audio.stop();
-            }
+
+              }
+              this.playing = !this.playing;
+
+          }
         },
         computed: {
             swiper() {
                 return this.$refs.mySwiper.swiper
+            },
+            play_src:function(){
+                return this.playing?require("../../../assets/images/tools_btn_pause.png"):require("../../../assets/images/tools_btn_play.png");
             }
         },
         mounted() {
@@ -168,10 +176,16 @@
                     width: px2rem(372);
                     margin: px2rem(69) auto 0 auto;
                     display: flex;
+                    font-size: 0;
                     justify-content: space-between;
                     align-items: center;
                     li {
+                        a{
+                            display: block;
+                        }
                         .player-btn{
+                            display: block;
+                            border-radius: 50%;
                             img{
                                 width: px2rem(120);
                                 height: px2rem(120);

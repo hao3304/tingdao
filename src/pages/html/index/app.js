@@ -4,9 +4,24 @@ import vTap from 'v-tap';
 import VueRouter from 'vue-router';
 import routes from './router';
 import 'swiper/dist/css/swiper.css'
-
+import Login from '../views/login.vue';
+import VueLocalStorage from 'vue-ls';
 import './tools';
+import Ripple from 'vue-ripple-directive';
+import FastClick from 'fastclick';
 
+FastClick.attach(document.body);
+const options = {
+    namespace: 'tingdao__'
+};
+
+import VueStash from 'vue-stash';
+
+Vue.use(VueStash);
+
+Vue.use(VueLocalStorage, options);
+Ripple.color = 'rgba(255, 255, 255, 0.35)';
+Vue.directive('ripple', Ripple);
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 
 Vue.use(VueAwesomeSwiper)
@@ -26,7 +41,26 @@ window.apiready = function() {
     new Vue({
         router,
         el: '#app',
-        render: h => h(App)
+        data:{
+            store: {
+                token:'',
+                view:'Login'
+            }
+        },
+        template:`
+            <div :is="store.view">
+            </div>
+        `,
+        components:{
+            Login,
+            App
+        },
+        created(){
+            if(this.$ls.get("token")) {
+                this.store.token = this.$ls.get("token");
+                this.store.view = 'App';
+            }
+        }
     })
 }
 
@@ -34,6 +68,25 @@ if(window.location.search.indexOf('debug')>-1) {
     new Vue({
         router,
         el: '#app',
-        render: h => h(App)
+        data:{
+            store: {
+                token:'',
+                view:'Login'
+            }
+        },
+        template:`
+            <div :is="store.view">
+            </div>
+        `,
+        components:{
+            Login,
+            App
+        },
+        created(){
+            if(this.$ls.get("token")) {
+                this.store.token = this.$ls.get("token");
+                this.store.view = 'App';
+            }
+        }
     })
 }

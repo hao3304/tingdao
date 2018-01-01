@@ -154,6 +154,10 @@ html,body,.td-app{
             // this.frameWidth = api.frameWidth || '';
             // this.frameHeight = api.frameHeight || '';
             // this.dataHasLoaded = true;
+
+            this.active = this.tabs.findIndex(item=>{
+                return item.url == this.$route.path;
+            });
         }
     }
 </script>

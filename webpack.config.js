@@ -27,7 +27,8 @@ let config = {
             assets: join(__dirname, '/src/assets'),
             components: join(__dirname, '/src/components'),
             public: join(__dirname, '/src/public'),
-            root: join(__dirname, 'node_modules')
+            root: join(__dirname, 'node_modules'),
+            'vue$': 'vue/dist/vue.esm.js'
         }
     },
     externals: [

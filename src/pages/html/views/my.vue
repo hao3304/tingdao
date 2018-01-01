@@ -71,7 +71,7 @@
                </van-cell-group>
        </section>
         <section class="btn-block">
-            <button >退出登录</button>
+            <button v-ripple @click="onLogout">退出登录</button>
         </section>
         </van-pull-refresh>
     </div>
@@ -147,6 +147,7 @@
         .van-cell__title .van-icon{
             font-size: px2rem(36);
             color: #ddd;
+            margin-left: px2rem(2);
         }
         .van-cell__right-icon{
             font-size: px2rem(20);
@@ -191,11 +192,35 @@
     }
 </style>
 <script>
+    import { Dialog } from 'vant';
+    import { getUserInfo } from '../index/services';
     export default {
+        store:['view','token'],
         data(){
             return {
-                isLoading:false
+                isLoading:false,
+
             }
+        },
+        methods:{
+            onLogout(){
+                Dialog.confirm({
+                    title: '提示',
+                    message: '确定要退出当前登录用户吗？'
+                }).then(() => {
+                    this.$ls.set("token",null);
+                    this.view = 'Login';
+                }).catch(() => {
+                    // on cancel
+                });
+            },
+            render(){
+                getUserInfo(this.token).then(rep=>{
+                })
+            }
+        },
+        mounted(){
+            this.render();
         },
         watch:{
             isLoading(b){

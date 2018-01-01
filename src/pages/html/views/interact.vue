@@ -35,13 +35,16 @@
                 <span class="player-button">
 
                 </span>
-                <h5>背包去旅行</h5>
+                <h5>{{radio.video_title}}</h5>
                 <p>17:30 /周二</p>
             </section>
 
             <section class="voice-block">
-                <div class="voice-circle" @click="onSpeech"></div>
-                <span class="voice-tag">
+                <div class="voice-circle" @click="onSpeech">
+                    <p>300s</p>
+                    <h5>开启语音互动</h5>
+                </div>
+                <span class="voice-tag" @click="onCloseSpeech">
                     字
                 </span>
             </section>
@@ -52,27 +55,60 @@
 </template>
 
 <script>
+    //    var speech = api.require('speechRecognizer');
+    import {getRadio,getRadioDetail} from '../index/services';
+    import { Toast } from 'vant';
     export default {
-
+        data(){
+            return {
+                radio:{
+                    live:0,
+                    name:'',
+                    video_title:'',
+                    video_url:'',
+                    id:'',
+                    activity:{
+                        title:'',
+                        stat:'',
+                        id:''
+                    }
+                }
+            }
+        },
         methods:{
             onSpeech(){
-                var obj = api.require('speechRecognizer');
+                var speech = api.require('speechRecognizer');
                 api.toast({
-                    msg : "语音识别开始，请说话",
+                    msg : "语音识别开始，请说话1~",
                     duration : 1000,
                     location : "middle"
                 });
 
-                obj.record({
+                speech.record({
+                    audioPath: 'fs://speechTest/speech2.pcm'
                 },function(ret,err){
                     if(ret.status){
                         // ret.wordStr;
-                        api.alert({
-                            title : "识别结果",
-                            msg : ret.wordStr
-                        })
-                        obj.cancelRecord();
+//                        api.alert({
+//                            title : "识别结果",
+//                            msg : ret.wordStr
+//                        })
+//                        obj.cancelRecord();
+                        api.toast({
+                            msg : ret.wordStr,
+                            duration : 1000,
+                            location : "middle"
+                        });
                     }
+                });
+            },
+            onCloseSpeech(){
+                var speech = api.require('speechRecognizer');
+                speech.stopRecord();
+                api.toast({
+                    msg : "语音关闭",
+                    duration : 1000,
+                    location : "middle"
                 });
             },
             onShowList() {
@@ -85,6 +121,18 @@
                 });
 
             }
+        },
+        mounted(){
+            Toast.loading({ mask: false });
+            getRadio().then(rep=>{
+                if(rep.total>0) {
+                    getRadioDetail(rep.data[0].id).then(rep=>{
+                        Toast.clear();
+                        this.radio = rep;
+
+                    })
+                }
+            })
         }
     }
 </script>
@@ -235,12 +283,28 @@
             .voice-circle{
                 width: px2rem(320);
                 height: px2rem(320);
-                background-color: #ffffff;
+                background:url(../../../assets/images/Wechat.png) no-repeat;
+                background-position: center center;
+                background-size: px2rem(140) px2rem(140);
                 box-shadow: 0px 0px px2rem(40) 0px
                 rgba(0, 0, 0, 0.05);
                 border: solid 2px #fce76c;
                 margin: 0 auto;
                 border-radius: 50%;
+                position: relative;
+                p{
+                    text-align: center;
+                    font-size: px2rem(24);
+                    margin: 0;
+                    padding-top: px2rem(54);
+                    color: rgba(38,38,40,0.4);
+                }
+                h5{
+                    margin-top: px2rem(145);
+                    text-align: center;
+                    color: #262628;
+                    font-size: px2rem(24);
+                }
             }
             .voice-tag{
                 display: inline-block;
