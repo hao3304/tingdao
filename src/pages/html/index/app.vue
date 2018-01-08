@@ -44,7 +44,7 @@
         font-family: "PingFang SC";
 
         .van-tabbar--fixed.van-hairline--top-bottom::after{
-            border-width: px2rem(2) 0;
+            border-width: 1px 0;
         }
 
         .van-pull-refresh__head{

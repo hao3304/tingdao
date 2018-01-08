@@ -5,8 +5,8 @@
         </van-nav-bar>
         <div class="container">
             <swiper  :options="swiperOption" ref="mySwiper">
-                <swiper-slide v-for="n in 7">
-                    <div class="content">
+                <swiper-slide v-for="(n,index) in list">
+                    <div class="content" :style="{backgroundImage:'url('+ src + n.img +')'}">
                         <div class="toolbar">
                             <a href="#">
                                 <img src="../../../assets/images/ico_like@3x.png" alt="">
@@ -15,9 +15,9 @@
                                 <img src="../../../assets/images/ico_del_W@3x.png" alt="">
                             </a>
                         </div>
-                        <div class="time">
-                            <span class="now">{{info.current}}</span>
-                            <span class="total">{{info.duration}}</span>
+                        <div class="time" v-show="index == active">
+                            <span class="now">{{current}}</span>
+                            <span class="total">{{duration}}</span>
                         </div>
                     </div>
 
@@ -26,14 +26,14 @@
 
             <div class="player-block">
                 <h5>
-                    背包去旅行
+                    {{info.name}}
                 </h5>
-                <p>
-                    17:15 /周二
-                </p>
+                <!--<p>-->
+                    <!--17:15 /周二-->
+                <!--</p>-->
                 <ul>
                     <li>
-                        <a href="#"  v-ripple  class="tools-back">
+                        <a href="#"  v-ripple  class="tools-back" @click="onPrev">
                             <img src="../../../assets/images/tools_back@3x.png" alt="">
                         </a>
                     </li>
@@ -43,22 +43,25 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"  v-ripple  class="tools-next">
-                        <img src="../../../assets/images/tools_next@3x.png" alt="">
+                        <a href="#"  v-ripple  class="tools-next" @click="onNext">
+                            <img src="../../../assets/images/tools_next@3x.png" alt="">
                         </a>
                     </li>
                 </ul>
 
             </div>
-
         </div>
     </div>
 </template>
 <script>
+    import {getVideo,src,fmSrc} from '../index/services';
+    import { Toast } from 'vant';
     export default {
-        store:['paddingTop'],
+        store:['paddingTop','token','interact_status','fm_playing'],
         data(){
+            let active = this.$ls.get('fm_active',0);
             return {
+                src:src,
                 swiperOption:{
                     effect: 'coverflow',
                     grabCursor: true,
@@ -70,50 +73,103 @@
                         depth: 100,
                         modifier: 1,
                         slideShadows : false
+                    },
+                    on:{
+                        slideChange:(x)=>{
+                            this.onChange();
+                        }
                     }
                 },
                 info:{
-                    duration:'00:11',
-                    current:'22:22',
-                    complete:true
+                    "id": "",
+                    "name": "",
+                    "img": "",
+                    "count": "1",
+                    "brief": "",
+                    "audio_link": "",
+                    "play_time": 0,
+                    "play_count": 0,
+                    "position": 1
                 },
-                playing:false
+                current:'00:00',
+                duration:'00:00',
+                list:[],
+                active:active
             }
         },
-
+        watch:{
+            active(a){
+                this.$ls.set('fm_active',a);
+            }
+        },
         methods:{
-          onPlayer(){
-              var audio = api.require('audio');
-              if(this.playing) {
-                  audio.stop();
-              }else{
-                  var self = this;
-                  audio.play({
-                      path: 'http://living.muzhifm.com/muzhifm/hangzhou_xihuzs_1054.m3u8?auth_key=1604286295-0-0-d3614ac1992b1af4adbf9afab35be2c9'
-                  }, function(ret, err) {
-                      self.info.duration = new Date(ret.duration*1000).Format('mm:ss');
-                      self.info.current = new Date(ret.current*1000).Format('mm:ss');
-                  });
-
-
-              }
-              this.playing = !this.playing;
-
-          }
+            onPlayer(){
+                var audio = api.require('audio');
+                if(this.fm_playing) {
+                    audio.pause();
+                }else{
+                    this.interact_status = 'play';
+                   setTimeout(()=>{
+                       audio.play({
+                           path: fmSrc + this.info.audio_link
+                       }, (ret, err) =>{
+                           if(!err){
+                               this.duration = new Date(ret.duration*1000).Format('mm:ss');
+                               this.current = new Date(ret.current*1000).Format('mm:ss');
+                           }else{
+                               this.stopPlay();
+                               this.onPlayer();
+                           }
+                       });
+                   },1)
+                }
+                this.fm_playing = !this.fm_playing;
+            },
+            stopPlay(){
+                var audio = api.require('audio');
+                this.current = '00:00';
+                this.duration = '00:00';
+                audio.stop();
+                this.fm_playing = false;
+            },
+            render(){
+                Toast.loading();
+                getVideo({token:this.token}).then( (rep)=>{
+                    this.list = rep;
+                    this.info = this.list[this.active];
+                    this.swiper.slideTo(this.active);
+                    Toast.clear();
+                })
+            },
+            onNext(){
+                this.swiper.slideNext();
+                this.onChange();
+            },
+            onPrev() {
+                this.swiper.slidePrev();
+                this.onChange();
+            },
+            onChange(){
+                setTimeout(()=>{
+                    this.info = this.list[this.swiper.activeIndex];
+                    this.active = this.swiper.activeIndex;
+                    this.stopPlay();
+                    this.onPlayer();
+                },400)
+            }
         },
         computed: {
             swiper() {
                 return this.$refs.mySwiper.swiper
             },
             play_src:function(){
-                return this.playing?require("../../../assets/images/tools_btn_pause.png"):require("../../../assets/images/tools_btn_play.png");
+                return this.fm_playing?require("../../../assets/images/tools_btn_pause.png"):require("../../../assets/images/tools_btn_play.png");
             }
         },
         mounted() {
-            // current swiper instance
-            // 然后你就可以使用当前上下文内的swiper对象去做你想做的事了
-            console.log('this is current swiper instance object', this.swiper)
-            // this.swiper.slideTo(3, 1000, false)
+
+            this.render();
+
         }
     }
 </script>
@@ -214,7 +270,7 @@
                 height: px2rem(590);
                 box-shadow: 0px px2rem(20) px2rem(50) 0px
                 rgba(0, 0, 0, 0.1);
-                background:url("../../../assets/images/fm_bg.png") no-repeat;
+                background-repeat: no-repeat;
                 background-size: 100% 100%;
             }
         }

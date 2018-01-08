@@ -6,7 +6,8 @@ import 'swiper/dist/css/swiper.css'
 import VueLocalStorage from 'vue-ls';
 import './tools';
 import Ripple from 'vue-ripple-directive';
-
+require('vue2-animate/dist/vue2-animate.min.css')
+import '../../../assets/css/iconfont.css';
 import vueTouch from 'vue-plugin-touch';
 Vue.use(vueTouch);
 
@@ -60,6 +61,8 @@ function GetQueryString(name)
     if(r!=null)return  unescape(r[2]); return null;
 }
 
+
+
 window.apiready = function() {
     new Vue({
         router,
@@ -67,7 +70,10 @@ window.apiready = function() {
         data:{
             store: {
                 token:'',
-                paddingTop:api.systemType=='ios'?'20px':'25px'
+                paddingTop:api.systemType=='ios'?'20px':'25px',
+                interact_status:'play',
+                fm_playing:false
+
             }
         },
         template:`

@@ -3,11 +3,10 @@
         <van-nav-bar  :style="{paddingTop:paddingTop}" title="我的" >
         </van-nav-bar>
         <van-pull-refresh class="container" v-model="isLoading">
-
         <header>
             <div class="logo"></div>
-            <div class="avatar"></div>
-            <div class="username">Avery</div>
+            <div class="avatar" :style="{backgroundImage:'url('+src + info.head+')'}"></div>
+            <div class="username">{{info.nick_name}}</div>
         </header>
         <section class="my-info">
             <van-cell-group>
@@ -23,7 +22,7 @@
                 </van-cell>
                 <van-cell value="内容" icon="like-o" isLink>
                     <template>
-                        <span style="color: #ddd">珞珈之声</span>
+                        <span style="color: #ddd">{{info.radio_name}}</span>
                     </template>
                     <template slot="title">
                         <span class="van-cell-text">
@@ -31,9 +30,9 @@
                         </span>
                     </template>
                 </van-cell>
-                <van-cell icon="success" isLink>
-                    <template>
-                        <span class="active-badge">20</span>
+                <van-cell icon="success" @click="onMyActivity" isLink>
+                    <template >
+                        <span v-show="info.activity.length>0" class="active-badge">{{info.activity.length}}</span>
                     </template>
                     <template slot="title">
                         <span class="van-cell-text">
@@ -104,9 +103,10 @@
                 position: absolute;
                 width: px2rem(160);
                 height: px2rem(160);
-                background-color: #ddd;
                 border-radius: 50%;
                 z-index: 2000;
+                background-repeat: no-repeat;
+                background-size: cover;
             }
             .username{
                 position: absolute;
@@ -191,12 +191,20 @@
 </style>
 <script>
     import { Dialog } from 'vant';
-    import { getUserInfo } from '../index/services';
+    import { getUserInfo,src,getPath } from '../index/services';
+    import { Toast } from 'vant';
     export default {
         store:['view','token','paddingTop'],
         data(){
             return {
                 isLoading:false,
+                src:src,
+                info:{
+                    nick_name:'',
+                    activity:[],
+                    head:'',
+                    radio_name:''
+                }
             }
         },
         methods:{
@@ -212,8 +220,20 @@
                 });
             },
             render(){
+                Toast.loading();
                 getUserInfo(this.token).then(rep=>{
+                    this.info = rep;
+                    Toast.clear();
                 })
+            },
+            onMyActivity(){
+                api.openWin({
+                    name: 'my-activity',
+                    url: getPath() + '/html/index.html?path=my-activity',
+                    pageParam:{
+                        name:'test'
+                    }
+                });
             }
         },
         mounted(){

@@ -1,6 +1,6 @@
 <template>
     <div class="view-login">
-        <van-nav-bar title="账号登录" >
+        <van-nav-bar title="账号登录" :style="{paddingTop:paddingTop}" >
         </van-nav-bar>
         <div class="bg-block"></div>
         <div class="login-form">
@@ -27,7 +27,7 @@
     import { Toast } from 'vant';
     export default {
         name:'login',
-        store:['view','token'],
+        store:['view','token','paddingTop'],
         data(){
             return {
                 form:{
@@ -41,14 +41,33 @@
                  Toast.loading({
                     forbidClick: true
                 });
+                var push = api.require('push');
                 login(this.form).then(rep=>{
                     if(rep) {
                         this.$ls.set("token",rep.token);
+                        this.$ls.set("userName",rep.userName);
+                        this.$ls.set("userId",rep.userId);
                         this.token = rep.token;
-                        this.$router.push('/app');
+                        push.bind({
+                            userName: rep.userName,
+                            userId: rep.userId
+                        },(ret)=>{
+                            Toast.clear();
+                            this.$router.push('/app');
+                        });
                     }
-                    Toast.clear();
                 })
+
+//                login(this.form).then(rep=>{
+//                    if(rep) {
+//                        this.$ls.set("token",rep.token);
+//                        this.$ls.set("userName",rep.userName);
+//                        this.$ls.set("userId",rep.userId);
+//                        this.token = rep.token;
+//                        Toast.clear();
+//                        this.$router.push('/app');
+//                    }
+//                })
 
             }
         }
