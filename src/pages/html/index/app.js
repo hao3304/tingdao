@@ -1,13 +1,19 @@
-import App from './app.vue';
+
 import Vue from 'vue';
-import vTap from 'v-tap';
 import VueRouter from 'vue-router';
 import routes from './router';
 import 'swiper/dist/css/swiper.css'
-import Login from '../views/login.vue';
 import VueLocalStorage from 'vue-ls';
 import './tools';
 import Ripple from 'vue-ripple-directive';
+
+import vueTouch from 'vue-plugin-touch';
+Vue.use(vueTouch);
+
+import VueProgressiveImage from 'vue-progressive-image'
+
+Vue.use(VueProgressiveImage)
+
 import FastClick from 'fastclick';
 
 FastClick.attach(document.body);
@@ -31,11 +37,28 @@ const router = new VueRouter({
   routes // （缩写）相当于 routes: routes
 })
 
-Vue.use(vTap); //添加vue tap事件
-
 import Vant from 'vant';
 import 'vant/lib/vant-css/index.css';
 Vue.use(Vant);
+
+router.beforeEach((to, from, next) => {
+    if(to.path == '/login') {
+        return next();
+    }
+    if(Vue.ls.get('token')) {
+        return next();
+    }else{
+        return next('/login');
+    }
+});
+
+
+function GetQueryString(name)
+{
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if(r!=null)return  unescape(r[2]); return null;
+}
 
 window.apiready = function() {
     new Vue({
@@ -44,21 +67,21 @@ window.apiready = function() {
         data:{
             store: {
                 token:'',
-                view:'Login'
+                paddingTop:api.systemType=='ios'?'20px':'25px'
             }
         },
         template:`
-            <div :is="store.view">
-            </div>
+         <router-view></router-view>
         `,
-        components:{
-            Login,
-            App
-        },
         created(){
             if(this.$ls.get("token")) {
                 this.store.token = this.$ls.get("token");
-                this.store.view = 'App';
+                var path = GetQueryString('path');
+                if(path){
+                    this.$router.replace('/'+path);
+                }else if(this.$route.path == ''|| this.$route.path =='/'){
+                    this.$router.push('/app');
+                }
             }
         }
     })
@@ -70,22 +93,21 @@ if(window.location.search.indexOf('debug')>-1) {
         el: '#app',
         data:{
             store: {
-                token:'',
-                view:'Login'
+                token:''
             }
         },
         template:`
-            <div :is="store.view">
-            </div>
+         <router-view></router-view>
         `,
-        components:{
-            Login,
-            App
-        },
         created(){
             if(this.$ls.get("token")) {
                 this.store.token = this.$ls.get("token");
-                this.store.view = 'App';
+                var path = GetQueryString('path');
+                if(path){
+                    this.$router.replace('/'+path);
+                }else if(this.$route.path == ''|| this.$route.path =='/'){
+                    this.$router.push('/app');
+                }
             }
         }
     })

@@ -1,5 +1,5 @@
 <template>
-    <div class="view-live">
+    <div class="view-live" :style="{paddingTop:paddingTop}" >
         <ul class="tab">
             <li class="active">
                 <a href="javascript:;">热门直播</a>
@@ -8,19 +8,19 @@
                 <a href="javascript:;">我的关注</a>
             </li>
         </ul>
-        <div class="content">
-            <pull-to >
+        <div class="content" >
+            <van-pull-refresh v-model="isLoading">
             <ul class="list">
-                <li class="item" v-for="n in 100">
+                <li class="item" v-for="n in 40">
                     <img src="../../../assets/images/player_bg.png" alt="">
                     <p>直播名称</p>
                 </li>
             </ul>
-            </pull-to>
+            </van-pull-refresh>
         </div>
     </div>
 </template>
-<style lang="sass" type="text/scss">
+<style lang="sass" type="text/scss" scoped>
     @import "../../../public/px2rem.scss";
     .view-live{
         height: 100%;
@@ -48,8 +48,8 @@
             }
         }
         .content{
+            overflow: hidden;
             padding-bottom: px2rem(188);
-            height: 100%;
             ul.list{
                 padding-top: px2rem(48);
                 display: flex;
@@ -82,17 +82,24 @@
 <script>
     import PullTo from 'vue-pull-to'
     export default {
+        store:['paddingTop'],
         data(){
             return {
                 isLoading:false
             }
         },
-        methods:{
-            refresh(loaded){
-                setTimeout(()=>{
-                    loaded('done');
-                },2000)
+        watch: {
+            isLoading() {
+                if (this.isLoading) {
+                    setTimeout(() => {
+                        this.isLoading = false;
+                        this.count++;
+                    }, 500);
+                }
             }
+        },
+        methods:{
+
         },
         components:{
             PullTo

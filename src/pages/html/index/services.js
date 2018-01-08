@@ -1,10 +1,19 @@
 import axios from 'axios';
 import { Toast } from 'vant';
+export const base = 'http://116.62.186.169:8903/api';
+export const src ='http://116.62.186.169:8903/static/upload/';
+const path = 'prod';
 
-export const src ='http://116.62.186.169:8903/static/upload';
+export const getPath = ()=>{
+    if(path == 'dev') {
+        return '';
+    }else{
+        return api.wgtRootDir +'/dist';
+    }
+}
 
 var instance = axios.create({
-    baseURL: 'http://116.62.186.169:8903/api',
+    baseURL: base,
     timeout:8000
 });
 
@@ -23,5 +32,6 @@ instance.interceptors.response.use(function (response) {
 
 export const login = (params)=>instance.post(`/member/mobile/login`,params);
 export const getUserInfo = token=>instance.get(`/member/${token}`);
-export const getRadio = ()=>instance.get(`/radio`);
-export const getRadioDetail = (id)=>instance.get(`/radio/${id}`);
+export const getVideo = ()=>instance.get(`/radio`);
+export const getVideoDetail = (id)=>instance.get(`/radio/${id}`);
+export const postVoice = params=>instance.post('/radio/voice',params);

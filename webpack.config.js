@@ -137,11 +137,11 @@ let config = {
 };
 
 const pages = getHtmls();
-
 pages.forEach(function(pathname) {
     // filename 用文件夹名字
 
     let fileBasename = pathname.substring(6, pathname.length - 4);
+
     var conf = {
         filename: fileBasename + '.html', //生成的html存放路径，相对于path
         template: 'src/' + pathname + '.html', //html模板路径

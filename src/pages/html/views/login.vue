@@ -45,7 +45,7 @@
                     if(rep) {
                         this.$ls.set("token",rep.token);
                         this.token = rep.token;
-                        this.view = "App";
+                        this.$router.push('/app');
                     }
                     Toast.clear();
                 })
@@ -54,7 +54,7 @@
         }
     }
 </script>
-<style lang="sass" type="text/scss">
+<style lang="sass" type="text/scss" scoped>
     @import "../../../public/px2rem.scss";
     .view-login{
         .van-nav-bar{

@@ -1,7 +1,7 @@
 <template>
 
     <div class="view-fm">
-        <van-nav-bar title="我的私人FM" >
+        <van-nav-bar title="我的私人FM" :style="{'paddingTop':paddingTop}" >
         </van-nav-bar>
         <div class="container">
             <swiper  :options="swiperOption" ref="mySwiper">
@@ -56,6 +56,7 @@
 </template>
 <script>
     export default {
+        store:['paddingTop'],
         data(){
             return {
                 swiperOption:{
@@ -117,7 +118,7 @@
     }
 </script>
 
-<style lang="sass" type="text/scss">
+<style lang="sass" type="text/scss" scoped>
     @import "../../../public/px2rem.scss";
     .view-fm{
         .van-hairline--top-bottom::after{

@@ -1,19 +1,19 @@
 <template>
     <div class="view-interact">
-        <van-nav-bar id="header" title="珞珈之声" @click-left="onShowList" >
+        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" :title="video.name" @click-left="onShowList" >
       <span slot="right" class="header-button" >
           <img src="../../../assets/images/btn_live_OFF@3x.png" alt="">
       </span>
-            <span slot="left" class="header-button" >
+            <span slot="left" class="header-button"  >
                 <img src="../../../assets/images/ico_navbar_menu@3x.png" alt="">
             </span>
         </van-nav-bar>
 
         <div class="main">
-            <section class="base-block">
+            <section class="base-block" >
                 <p>
                     <img src="../../../assets/images/ico_playing_S@3x.png" alt="">
-                    <span>正在播放</span>
+                    <span>{{video.video_play==1?'正在播放':'暂无节目'}}</span>
                 </p>
 
                 <div class="news">
@@ -21,8 +21,8 @@
                         <img src="../../../assets/images/ico_remind@3x.png" alt="">
                     </div>
                     <div class="content">
-                        <h5>Meet-Drama晚会排队</h5>
-                        <p>正在进行中</p>
+                        <h5>{{video.activity.title}}</h5>
+                        <p>{{video.activity.stat == 0?'已结束':'正在进行中'}}</p>
                     </div>
                     <div class="arrow">
                         <img src="../../../assets/images/ico_more@3x.png" alt="">
@@ -31,20 +31,20 @@
 
             </section>
 
-            <section class="player-block">
-                <span class="player-button">
+            <section class="player-block" :style="playBg">
+                <span class="play-button" :class="status" v-ripple @click="onPlay">
 
                 </span>
-                <h5>{{radio.video_title}}</h5>
-                <p>17:30 /周二</p>
+                <h5>{{video.video_title}}</h5>
+                <p>{{video.video_time}}</p>
             </section>
 
             <section class="voice-block">
-                <div class="voice-circle" @click="onSpeech">
-                    <p>300s</p>
+                <div class="voice-circle" :class="{'speech':speech}" v-touch:touchstart="onSpeech" v-touch:touchend="onCloseSpeech">
+                    <p>&nbsp;</p>
                     <h5>开启语音互动</h5>
                 </div>
-                <span class="voice-tag" @click="onCloseSpeech">
+                <span class="voice-tag" @click.stop="onText">
                     字
                 </span>
             </section>
@@ -56,90 +56,188 @@
 
 <script>
     //    var speech = api.require('speechRecognizer');
-    import {getRadio,getRadioDetail} from '../index/services';
+    import {getVideo,getVideoDetail,src, base ,postVoice,getPath} from '../index/services';
     import { Toast } from 'vant';
     export default {
+        store:['paddingTop'],
         data(){
             return {
-                radio:{
+                video:{
                     live:0,
                     name:'',
                     video_title:'',
+                    video_time:'',
                     video_url:'',
+                    pic:'',
+                    video_play:0, //0无节目 1正在播放
                     id:'',
                     activity:{
                         title:'',
                         stat:'',
                         id:''
                     }
-                }
+                },
+                status:'play',
+                wordStr:'',
+                speech:false
             }
+        },
+        computed:{
+          playBg(){
+             return this.video.pic == ''?null:{
+                 backgroundImage:`url(${src}${this.video.pic})`
+             };
+          }
         },
         methods:{
             onSpeech(){
+                this.speech = true;
                 var speech = api.require('speechRecognizer');
-                api.toast({
-                    msg : "语音识别开始，请说话1~",
-                    duration : 1000,
-                    location : "middle"
+                api.startPlay({
+                    path:'widget://voice/di.mp3'
+                });
+
+                Toast.fail({
+                    duration:0,
+                    message:"开始说话",
                 });
 
                 speech.record({
-                    audioPath: 'fs://speechTest/speech2.pcm'
-                },function(ret,err){
+                    audioPath: 'fs://speechTest/speech.wav'
+                },(ret,err)=>{
                     if(ret.status){
-                        // ret.wordStr;
-//                        api.alert({
-//                            title : "识别结果",
-//                            msg : ret.wordStr
-//                        })
-//                        obj.cancelRecord();
-                        api.toast({
-                            msg : ret.wordStr,
-                            duration : 1000,
-                            location : "middle"
-                        });
+                        this.wordStr = ret.wordStr;
                     }
                 });
             },
             onCloseSpeech(){
+                Toast.clear();
+                this.speech = false;
                 var speech = api.require('speechRecognizer');
                 speech.stopRecord();
-                api.toast({
-                    msg : "语音关闭",
-                    duration : 1000,
-                    location : "middle"
-                });
+                Toast.loading();
+                setTimeout(()=>{
+                    api.ajax({
+                        url:base +'/radio/voice/upload',
+                        method: 'post',
+                        dataType: 'json',
+                        returnAll:false,
+                        data:{
+                            files:{file:'fs://speechTest/speech.wav'},
+                            values:{token:this.$ls.get('token')}
+                        }
+                    }, (ret,err)=> {
+                        if(ret.code ==0) {
+                            let url = ret.response.src;
+                            postVoice({
+                                token:this.$ls.get('token'),
+                                type:0,
+                                voice_url:url,
+                                text:this.wordStr
+                            }).then(rep=>{
+                                Toast.clear();
+                            })
+                        }
+                    })
+                },200)
+
             },
             onShowList() {
                 api.openWin({
                     name: 'test',
-                    url: '/test.html',
+                    url: getPath() + '/html/index.html?path=list',
                     pageParam:{
                         name:'test'
                     }
                 });
-
+            },
+            playVideo(path){
+                var audio = api.require('audio');
+                Toast.loading({ mask: false });
+                audio.play({
+                    path:path
+                }, function(ret, err) {
+                    Toast.clear();
+                });
+            },
+            pauseVideo(){
+                var audio = api.require('audio');
+                audio.stop();
+            },
+            onPlay(){
+                this.status = this.status == 'pause'?'play':'pause';
+                if(this.status == 'pause') {
+                    this.playVideo(this.video.video_url);
+                }else {
+                    this.pauseVideo();
+                }
+            },
+            render(id){
+                getVideoDetail(id).then(rep=>{
+                    Toast.clear();
+                    this.video = rep;
+                    this.onPlay();
+                })
+            },
+            onText(){
+                api.openWin({
+                    name: 'test',
+                    url:getPath() + '/html/index.html?path=textarea',
+                    pageParam:{
+                        name:'test'
+                    },
+                    animation:{
+                        type:'movein',
+                        subType:'from_bottom'
+                    }
+                });
             }
         },
+        watch:{
+          speech(b){
+              var audio = api.require('audio');
+              if(b) {
+                  if(this.status == 'pause') {
+                      audio.pause();
+                  }
+              }else{
+                  if(this.status == 'pause') {
+                      audio.play();
+                  }
+              }
+          }
+        },
         mounted(){
+            var audio = api.require('audio');
             Toast.loading({ mask: false });
-            getRadio().then(rep=>{
+            getVideo().then(rep=>{
                 if(rep.total>0) {
-                    getRadioDetail(rep.data[0].id).then(rep=>{
-                        Toast.clear();
-                        this.radio = rep;
+                    let current = this.$ls.get('currentId');
 
-                    })
+                    this.render(current||rep.data[0].id);
                 }
-            })
+            });
+
+            this.$ls.on("currentId", (rep) =>{
+                audio.stop();
+                this.status = 'play';
+                this.render(rep);
+            });
+
         }
     }
 </script>
 
-<style lang="sass"  type="text/scss">
+<style lang="sass"  type="text/scss" >
     @import "../../../public/px2rem.scss";
     .view-interact{
+        .van-nav-bar__right,.van-nav-bar__left{
+            width: px2rem(160) !important;
+        }
+        .van-nav-bar__left{
+            text-align: left;
+            padding-left: px2rem(34);
+        }
 
         .header-button{
             display: inline-block;
@@ -244,28 +342,37 @@
             left:px2rem(40);
             right:px2rem(40);
             height:px2rem(448);
-            background:url(../../../assets/images/player_bg.png) no-repeat;
+            background-repeat:no-repeat;
             background-size:100% 100%;
             padding-top: px2rem(160);
             padding-left: px2rem(40);
 
-            .player-button{
+            .play-button{
                 width: px2rem(100);
                 height: px2rem(100);
-                background:url(../../../assets/images/tools_play_light@3x.png) no-repeat;
                 display: inline-block;
-                background-size:100% 100%;
+                border-radius: 50%;
+
+                &.play{
+                    background:url(../../../assets/images/tools_play_light@3x.png) no-repeat;
+                    background-size:100% 100%;
+                }
+
+                &.pause{
+                    background:url(../../../assets/images/tools_suspended_light@3x.png) no-repeat;
+                    background-size:100% 100%;
+                }
             }
+
 
             h5{
                 font-family: "PingFang-SC-Bold";
                 font-size: px2rem(40);
-                font-weight: normal;
+                font-weight: 400;
                 font-stretch: normal;
                 line-height: px2rem(20);
-                letter-spacing: 0px;
-                margin-top: px2rem(71);
-                margin-bottom: 0;
+                margin-top: px2rem(70);
+                margin-bottom: px2rem(18);
                 color: #262628;
             }
             p{
@@ -292,6 +399,9 @@
                 margin: 0 auto;
                 border-radius: 50%;
                 position: relative;
+                &.speech{
+                    background-color: #f1f1f1;
+                }
                 p{
                     text-align: center;
                     font-size: px2rem(24);

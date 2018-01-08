@@ -1,6 +1,6 @@
 <template>
-    <div class="view-my">
-        <van-nav-bar title="我的" >
+    <div id="view-my">
+        <van-nav-bar  :style="{paddingTop:paddingTop}" title="我的" >
         </van-nav-bar>
         <van-pull-refresh class="container" v-model="isLoading">
 
@@ -76,25 +76,23 @@
         </van-pull-refresh>
     </div>
 </template>
-<style lang="sass"  type="text/scss">
+<style lang="sass"  type="text/scss" >
     @import "../../../public/px2rem.scss";
-    .view-my{
+    #view-my{
         height: 100%;
         .van-hairline--top-bottom::after{
             border-width: 0;
         }
         .container{
-            position: absolute;
             left: 0;
-            top:px2rem(88);
             right: 0;
             bottom:px2rem(98);
 
         }
 
         .van-nav-bar{
-            height: px2rem(88);
-            background-color: #fce76c;
+            height: px2rem(88) !important;;
+            background-color: #fce76c !important;
         }
         header{
             height: px2rem(480-40-88);
@@ -195,11 +193,10 @@
     import { Dialog } from 'vant';
     import { getUserInfo } from '../index/services';
     export default {
-        store:['view','token'],
+        store:['view','token','paddingTop'],
         data(){
             return {
                 isLoading:false,
-
             }
         },
         methods:{
@@ -209,7 +206,7 @@
                     message: '确定要退出当前登录用户吗？'
                 }).then(() => {
                     this.$ls.set("token",null);
-                    this.view = 'Login';
+                    this.$router.push('/login');
                 }).catch(() => {
                     // on cancel
                 });
