@@ -1,7 +1,10 @@
 <template>
 
     <div class="view-fm">
-        <van-nav-bar title="我的私人FM" :style="{'paddingTop':paddingTop}" >
+        <van-nav-bar title="我的私人FM" :style="{'paddingTop':paddingTop}" @click-right="onShowList" >
+             <span slot="right" class="header-button" >
+                     <img src="../../../assets/images/fmlist.png" slot="right" alt="">
+            </span>
         </van-nav-bar>
         <div class="container">
             <swiper  :options="swiperOption" ref="mySwiper">
@@ -9,10 +12,10 @@
                     <div class="content" :style="{backgroundImage:'url('+ src + n.img +')'}">
                         <div class="toolbar">
                             <a href="#">
-                                <img src="../../../assets/images/ico_like@3x.png" alt="">
+                                <!--<img src="../../../assets/images/ico_like@3x.png" alt="">-->
                             </a>
-                            <a href="#">
-                                <img src="../../../assets/images/ico_del_W@3x.png" alt="">
+                            <a href="#" >
+                                <img  src="../../../assets/images/ico_del_W@3x.png"  alt="">
                             </a>
                         </div>
                         <div class="time" v-show="index == active">
@@ -29,7 +32,7 @@
                     {{info.name}}
                 </h5>
                 <!--<p>-->
-                    <!--17:15 /周二-->
+                <!--17:15 /周二-->
                 <!--</p>-->
                 <ul>
                     <li>
@@ -38,7 +41,7 @@
                         </a>
                     </li>
                     <li>
-                        <a v-ripple href="#" class="player-btn"  @click="onPlayer" >
+                        <a v-ripple href="#" class="player-btn"  @click="onChangeStatus" >
                             <img :src="play_src" alt="">
                         </a>
                     </li>
@@ -54,10 +57,16 @@
     </div>
 </template>
 <script>
-    import {getVideo,src,fmSrc} from '../index/services';
+    import {getVideo,src,fmSrc,getPath} from '../index/services';
     import { Toast } from 'vant';
     export default {
         store:['paddingTop','token','interact_status','fm_playing'],
+        props:{
+            list:{
+                type:Array,
+                default:[]
+            }
+        },
         data(){
             let active = this.$ls.get('fm_active',0);
             return {
@@ -93,44 +102,75 @@
                 },
                 current:'00:00',
                 duration:'00:00',
-                list:[],
                 active:active
             }
         },
         watch:{
             active(a){
                 this.$ls.set('fm_active',a);
+            },
+            fm_playing(b){
+                if(b) {
+                    this.onPlayer();
+                }else{
+                    this.pausePlay();
+                }
             }
         },
         methods:{
-            onPlayer(){
-                var audio = api.require('audio');
-                if(this.fm_playing) {
-                    audio.pause();
-                }else{
-                    this.interact_status = 'play';
-                   setTimeout(()=>{
-                       audio.play({
-                           path: fmSrc + this.info.audio_link
-                       }, (ret, err) =>{
-                           if(!err){
-                               this.duration = new Date(ret.duration*1000).Format('mm:ss');
-                               this.current = new Date(ret.current*1000).Format('mm:ss');
-                           }else{
-                               this.stopPlay();
-                               this.onPlayer();
-                           }
-                       });
-                   },1)
-                }
+            onChangeStatus(){
                 this.fm_playing = !this.fm_playing;
             },
+            onPlayer(){
+                const audio = api.require('audio');
+
+                this.interact_status = 'play';
+                setTimeout(()=>{
+                    audio.play({
+                        path: fmSrc + this.info.audio_link
+                    }, (ret, err) =>{
+                        if(!err){
+                            this.duration = new Date(ret.duration*1000).Format('mm:ss');
+                            this.current = new Date(ret.current*1000).Format('mm:ss');
+                        }else{
+                            this.stopPlay();
+                            this.onPlayer();
+                        }
+                    });
+                },1)
+//                this.fm_playing = true;
+//                var audio = api.require('audio');
+//                if(this.fm_playing) {
+//                    audio.pause();
+//                }else{
+//                    this.interact_status = 'play';
+//                   setTimeout(()=>{
+//                       audio.play({
+//                           path: fmSrc + this.info.audio_link
+//                       }, (ret, err) =>{
+//                           if(!err){
+//                               this.duration = new Date(ret.duration*1000).Format('mm:ss');
+//                               this.current = new Date(ret.current*1000).Format('mm:ss');
+//                           }else{
+//                               this.stopPlay();
+//                               this.onPlayer();
+//                           }
+//                       });
+//                   },1)
+//                }
+//                this.fm_playing = !this.fm_playing;
+
+            },
+            pausePlay(){
+                const audio = api.require('audio');
+                audio.pause();
+            },
             stopPlay(){
-                var audio = api.require('audio');
+                const audio = api.require('audio');
+
                 this.current = '00:00';
                 this.duration = '00:00';
                 audio.stop();
-                this.fm_playing = false;
             },
             render(){
                 Toast.loading();
@@ -154,8 +194,32 @@
                     this.info = this.list[this.swiper.activeIndex];
                     this.active = this.swiper.activeIndex;
                     this.stopPlay();
-                    this.onPlayer();
+//                    this.fm_playing = false;
+//                    this.$nextTick(()=>{
+//                        this.fm_playing = true;
+//                    })
+                    if(!this.fm_playing) {
+                        this.fm_playing = true;
+                    }else{
+                        this.onPlayer();
+                    }
+
+//                    this.stopPlay();
+//                    this.onPlayer();
                 },400)
+            },
+            onShowList() {
+                this.stopPlay();
+                api.openWin({
+                    name: 'fm-list',
+                    url: getPath() + '/html/index.html?path=fm-list'
+                });
+            }
+        },
+        mounted(){
+            if(this.list&&this.list.length>0) {
+                this.info = this.list[this.active];
+                this.swiper.slideTo(this.active);
             }
         },
         computed: {
@@ -165,11 +229,6 @@
             play_src:function(){
                 return this.fm_playing?require("../../../assets/images/tools_btn_pause.png"):require("../../../assets/images/tools_btn_play.png");
             }
-        },
-        mounted() {
-
-            this.render();
-
         }
     }
 </script>
@@ -177,6 +236,13 @@
 <style lang="sass" type="text/scss" scoped>
     @import "../../../public/px2rem.scss";
     .view-fm{
+        .header-button{
+            display: inline-block;
+            padding-top:px2rem(16);
+            img{
+                height:px2rem(56);
+            }
+        }
         .van-hairline--top-bottom::after{
             border-width: 0;
         }

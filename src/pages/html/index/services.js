@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Toast } from 'vant';
 
-const ip = 'http://116.62.186.169:8903';
+const ip = 'http://39.106.219.227';
 
 export const base = `${ip}/api`;
 export const src =`${ip}/static/upload/`;
@@ -9,7 +9,7 @@ export const fmSrc =`${ip}/static/audio/`;
 const path = 'dev';
 
 export const getPath = ()=>{
-    if(path == 'prod') {
+    if(path == 'dev') {
         return '';
     }else{
         return api.wgtRootDir +'/dist';
@@ -41,4 +41,16 @@ export const getVideoDetail = (id)=>instance.get(`/radio/${id}`);
 export const postVoice = params=>instance.post('/radio/voice',params);
 export const getPush = (id)=>instance.get(`/radio/activity/${id}`);
 export const joinActivity = (params)=>instance.post(`/radio/activity/join`,params);
+export const getMyActivity = (params)=>instance.get(`/radio/activity/join`,{params});
 export const getActivity = (params)=>instance.get(`/radio/activity`,{params});
+export const getColumn = ()=>instance.get(`/radio/column`);
+export const getCode = (params)=>instance.get(`/member/code`,{params});
+export const getTags = (params)=>instance.get(`/radio/tags`,{params});
+export const postTags = (params)=>instance.post(`/radio/tags`,params);
+export const getDefaultFm = (params)=>instance.get('/radio/default',{params});
+export const setDefalutFm = params =>instance.post('/radio/default',params);
+
+export const getLive = params=>instance.get('/radio/live',{params});
+
+export const putMy = (token,params) => instance.put(`/member/${token}`,params);
+export const uploadPic = (params) => instance.post(`/radio/voice/upload/pic`,params);

@@ -1,6 +1,6 @@
 <template>
     <div class="view-interact">
-        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" :title="video.name"  @click-left="onShowList" >
+        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" :title="video.name" @click-right="onShowLive" @click-left="onShowList" >
       <span slot="right" class="header-button" >
           <img src="../../../assets/images/btn_live_OFF@3x.png" alt="">
       </span>
@@ -98,11 +98,11 @@
 
 <script>
     //    var speech = api.require('speechRecognizer');
-    import {getVideo,getVideoDetail,src, base ,postVoice,getPath,getPush} from '../index/services';
+    import {getDefaultFm,getVideoDetail,src, base ,postVoice,getPath,getPush} from '../index/services';
     import { Toast } from 'vant';
     import vDialog from '../components/vDialog.vue';
     export default {
-        store:['paddingTop','interact_status','fm_playing'],
+        store:['paddingTop','interact_status','fm_playing','token'],
         data(){
             return {
                 video:{
@@ -153,16 +153,8 @@
         methods:{
             onSpeech(){
                 this.speech = true;
+                this.fm_playing = false;
                 var speech = api.require('speechRecognizer');
-//                api.startPlay({
-//                    path:'widget://voice/di.mp3'
-//                });
-
-//                Toast.fail({
-//                    duration:0,
-//                    message:"开始说话",
-//                });
-
                 speech.record({
                     audioPath: 'fs://speechTest/speech.wav'
                 },(ret,err)=>{
@@ -227,6 +219,7 @@
                 var audio = api.require('audio');
                 this.fm_playing = false;
                 Toast.loading({ mask: false });
+                audio.stop();
                 audio.play({
                     path:path
                 }, function(ret, err) {
@@ -269,6 +262,13 @@
                         id:this.video.id
                     },
                 });
+            },
+            onShowLive(){
+                api.openWin({
+                    name: 'test',
+                    url:getPath() + '/html/index.html?path=radio-live'
+
+                });
             }
         },
         watch:{
@@ -305,14 +305,17 @@
                 }
             });
             Toast.loading({ mask: false });
-            getVideo().then(rep=>{
-                if(rep.total>0) {
-                    let current = this.$ls.get('currentId');
-                    this.render(current||rep.data[0].id);
+            getDefaultFm({token:this.token}).then(rep =>{
+                if(rep.id == 0) {
+                  //  let current = this.$ls.get('currentId');
+                    this.$router.replace('/list?type=default')
+                }else{
+                    this.render(rep.id);
                 }
             });
             this.$ls.on("currentId", (rep) =>{
                 audio.stop();
+                this.$router.replace("");
                 this.interact_status = 'play';
                 this.render(rep);
             });
@@ -336,18 +339,15 @@
             left: 0;
             right:0;
             background-color: rgba(0,0,0,.4);
-
             .speech-body{
                 position: absolute;
-                top:50%;
+                top: px2rem(300);
                 left: 50%;
                 background-color: rgba(0,0,0,.7);
                 height: px2rem(400);
-                width: px2rem(440);
-                margin-left: - px2rem(220);
-                margin-top: - px2rem(300);
+                width: px2rem(400);
+                margin-left: - px2rem(200);
                 border-radius: px2rem(20);
-
                 .content{
                     padding: 0 px2rem(10);
                     display: flex;

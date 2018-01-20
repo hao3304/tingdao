@@ -98,7 +98,7 @@
 </style>
 <script>
     import PullTo from 'vue-pull-to';
-    import {getMyActivity,src} from '../index/services';
+    import {getActivity,src} from '../index/services';
     import { Toast } from 'vant';
     export default {
         store:['paddingTop'],
@@ -137,7 +137,7 @@
             PullTo
         },
         mounted(){
-            getMyActivity({id:1||api.pageParam.id}).then( (rep) =>{
+            getActivity({id:1||api.pageParam.id}).then( (rep) =>{
                 this.list = rep.data;
             })
         }

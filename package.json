@@ -16,7 +16,7 @@
     "node-sass": "^4.7.2",
     "postcss-loader": "^2.0.9",
     "v-tap": "^2.2.2",
-    "vant": "^0.11.6",
+    "vant": "^0.12.3",
     "vue": "^2.2.4",
     "vue-awesome-swiper": "^3.0.6",
     "vue-directive-touch": "^1.0.9",

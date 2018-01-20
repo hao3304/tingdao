@@ -1,77 +1,78 @@
 <template>
     <div id="view-my">
-        <van-nav-bar  :style="{paddingTop:paddingTop}" title="我的" >
+        <van-nav-bar  :style="{paddingTop:paddingTop}" @click-right="onConfig" title="我的" >
+            <van-icon slot="right" name="setting" />
         </van-nav-bar>
         <van-pull-refresh class="container" v-model="isLoading">
-        <header>
-            <div class="logo"></div>
-            <div class="avatar" :style="{backgroundImage:'url('+src + info.head+')'}"></div>
-            <div class="username">{{info.nick_name}}</div>
-        </header>
-        <section class="my-info">
-            <van-cell-group>
-                <van-cell  icon="clock" isLink>
-                    <template>
-                        <span style="color: #7ade81">09:38</span>
-                    </template>
-                    <template slot="title">
+            <header>
+                <div class="logo"></div>
+                <div class="avatar" :style="{backgroundImage:'url('+src + info.head+')'}"></div>
+                <div class="username">{{info.nick_name}}</div>
+            </header>
+            <section class="my-info">
+                <van-cell-group>
+                    <van-cell  icon="clock" @click="onMyTime"  isLink>
+                        <template>
+                            <span style="color: #7ade81">{{getTime(time)}}</span>
+                        </template>
+                        <template slot="title">
                         <span class="van-cell-text">
                             定时关闭
                         </span>
-                    </template>
-                </van-cell>
-                <van-cell value="内容" icon="like-o" isLink>
-                    <template>
-                        <span style="color: #ddd">{{info.radio_name}}</span>
-                    </template>
-                    <template slot="title">
+                        </template>
+                    </van-cell>
+                    <van-cell value="内容" icon="like-o" @click="onMyFm" isLink>
+                        <template>
+                            <span style="color: #ddd">{{info.radio_name}}</span>
+                        </template>
+                        <template slot="title">
                         <span class="van-cell-text">
                             我的默认电台
                         </span>
-                    </template>
-                </van-cell>
-                <van-cell icon="success" @click="onMyActivity" isLink>
-                    <template >
-                        <span v-show="info.activity.length>0" class="active-badge">{{info.activity.length}}</span>
-                    </template>
-                    <template slot="title">
+                        </template>
+                    </van-cell>
+                    <van-cell icon="success" @click="onMyActivity(info.activity)" isLink>
+                        <template >
+                            <span  class="active-badge">{{info.activity}}</span>
+                        </template>
+                        <template slot="title">
                         <span class="van-cell-text">
                             我的参与
                         </span>
-                    </template>
-                </van-cell>
+                        </template>
+                    </van-cell>
 
-            </van-cell-group>
-        </section>
-       <section class="other-block">
-               <van-cell-group>
-                   <van-cell value=""  isLink>
-                       <template slot="title">
+                </van-cell-group>
+            </section>
+            <section class="other-block">
+                <van-cell-group>
+                    <van-cell value=""  isLink>
+                        <template slot="title">
                         <span class="van-cell-text">
                             意见反馈
                         </span>
-                       </template>
-                   </van-cell>
-                   <van-cell value=""  isLink>
-                       <template slot="title">
+                        </template>
+                    </van-cell>
+                    <van-cell value=""  isLink>
+                        <template slot="title">
                         <span class="van-cell-text">
                             关于我们
                         </span>
-                       </template>
-                   </van-cell>
-                   <van-cell value="" isLink>
-                       <template slot="title">
+                        </template>
+                    </van-cell>
+                    <van-cell value="" isLink>
+                        <template slot="title">
                         <span class="van-cell-text">
                             支持我们
                         </span>
-                       </template>
-                   </van-cell>
+                        </template>
+                    </van-cell>
 
-               </van-cell-group>
-       </section>
-        <section class="btn-block">
-            <button v-ripple @click="onLogout">退出登录</button>
-        </section>
+                </van-cell-group>
+            </section>
+            <section class="btn-block">
+                <button v-ripple @click="onLogout">退出登录</button>
+            </section>
         </van-pull-refresh>
     </div>
 </template>
@@ -92,6 +93,9 @@
         .van-nav-bar{
             height: px2rem(88) !important;;
             background-color: #fce76c !important;
+            .van-icon{
+                color: #000;
+            }
         }
         header{
             height: px2rem(480-40-88);
@@ -201,10 +205,11 @@
                 src:src,
                 info:{
                     nick_name:'',
-                    activity:[],
+                    activity:0,
                     head:'',
                     radio_name:''
-                }
+                },
+                time:''
             }
         },
         methods:{
@@ -226,18 +231,66 @@
                     Toast.clear();
                 })
             },
-            onMyActivity(){
+            onMyActivity(v){
+                if(v) {
+                    api.openWin({
+                        name: 'my-activity',
+                        url: getPath() + '/html/index.html?path=my-activity',
+                        pageParam:{
+                            name:'test'
+                        }
+                    });
+                }
+            },
+            onMyFm() {
                 api.openWin({
-                    name: 'my-activity',
-                    url: getPath() + '/html/index.html?path=my-activity',
+                    name: 'my-fm',
+                    url: getPath() + '/html/index.html?path=list',
                     pageParam:{
                         name:'test'
                     }
+                });
+            },
+            onMyTime() {
+                api.openWin({
+                    name: 'my-time',
+                    url: getPath() + '/html/index.html?path=my-time',
+                    pageParam:{
+                        name:'test'
+                    }
+                });
+            },
+            closeTime(v) {
+                if(v == 0 && this.timer) {
+                    clearInterval(this.timer);
+                }
+                if(this.timer) {
+                    clearInterval(this.timer);
+                }
+                this.time = v*60;
+                this.timer = setInterval(()=>{
+                    this.time = this.time - 1;
+                    if(this.time == 0) {
+                        api.closeWidget();
+                    }
+                },1000);
+            },
+            getTime(t) {
+                if(t == 0) {
+                    return '不开启';
+                }
+                return new Date(t*1000).Format('mm:ss');
+            },
+            onConfig() {
+                api.openWin({
+                    name: 'config',
+                    url: getPath() + '/html/index.html?path=config',
                 });
             }
         },
         mounted(){
             this.render();
+            this.$ls.on('close-time',this.closeTime)
         },
         watch:{
             isLoading(b){

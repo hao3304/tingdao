@@ -1,6 +1,6 @@
 <template>
     <div class="view-list">
-        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" @click-left="onClickLeft"  left-arrow title="电台列表"  >
+        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" @click-left="onClickLeft"  :left-arrow="type != 'default'" title="电台列表"  >
 
         </van-nav-bar>
         <div class="content">
@@ -89,15 +89,16 @@
 </style>
 <script>
     import PullTo from 'vue-pull-to';
-    import {getVideo,src} from '../index/services';
+    import {getVideo,src,setDefalutFm} from '../index/services';
     import { Toast } from 'vant';
     export default {
-        store:['paddingTop'],
+        store:['paddingTop','token'],
         data(){
             return {
                 list:[],
                 src:src,
-                isLoading:false
+                isLoading:false,
+                type:''
             }
         },
         methods:{
@@ -110,8 +111,22 @@
                 api.closeWin();
             },
             onSelect(node){
-                this.$ls.set("currentId",node.id);
-                this.onClickLeft();
+
+                Toast.loading();
+
+                setDefalutFm({
+                    token:this.token,
+                    id:node.id
+                }).then(rep=>{
+                    this.$ls.set("currentId",node.id);
+                    Toast.clear();
+                    if(this.type == 'default') {
+                        this.$router.replace("/app");
+                    }else{
+                        this.onClickLeft();
+
+                    }
+                })
             }
         },
         watch: {
@@ -129,6 +144,8 @@
         },
         mounted(){
             Toast.loading();
+            this.type = this.$route.query.type;
+
             getVideo().then(rep=>{
                 Toast.clear();
                 this.list = rep.data;

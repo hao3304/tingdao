@@ -1,6 +1,6 @@
 <template>
     <div class="view-live" :style="{paddingTop:paddingTop}" >
-        <ul class="tab">
+        <ul class="tab" id="live-tab">
             <li class="active">
                 <a href="javascript:;">热门直播</a>
             </li>
@@ -8,12 +8,15 @@
                 <a href="javascript:;">我的关注</a>
             </li>
         </ul>
-        <div class="content" >
+        <div class="content" id="live-content">
             <van-pull-refresh v-model="isLoading">
             <ul class="list">
-                <li class="item" v-for="n in 40">
-                    <img src="../../../assets/images/player_bg.png" alt="">
-                    <p>直播名称</p>
+                <li class="item" v-for="n in data" @click="onOpenLive(n)" v-ripple>
+                    <div class="img">
+                        <progressive-img :src="src + n.img" />
+                        <span v-show="n.stat == 1">正在直播</span>
+                    </div>
+                    <p>{{n.roomName}}</p>
                 </li>
             </ul>
             </van-pull-refresh>
@@ -48,22 +51,40 @@
             }
         }
         .content{
-            overflow: hidden;
-            padding-bottom: px2rem(188);
+            overflow-y:auto;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            top:0;
+            padding-bottom: px2rem(88);
             ul.list{
                 padding-top: px2rem(48);
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: center;
                 li.item{
+
+
+                    position: relative;
                     margin-bottom: px2rem(37);
                     padding: 0 px2rem(10);
-                    img{
+                    .img{
                         width: px2rem(200);
                         height: px2rem(200);
                         background-color: #262628;
                         box-shadow: 0px px2rem(20) px2rem(20) 0px
                         rgba(0, 0, 0, 0.1);
+
+                        >span{
+                            position: absolute;
+                            top:px2rem(10);
+                            right: px2rem(20);
+                            font-size: px2rem(20);
+                            color: #fff;
+                            z-index: 100;
+                            background-color: #00aa00;
+                        }
                     }
                     p{
                         margin: 0;
@@ -80,29 +101,56 @@
 
 </style>
 <script>
-    import PullTo from 'vue-pull-to'
+    import PullTo from 'vue-pull-to';
+    import { getLive,src } from '../index/services';
     export default {
         store:['paddingTop'],
         data(){
             return {
-                isLoading:false
+                isLoading:false,
+                src:src,
+                data:[],
+                query:{
+                    page:1,
+                    size:20,
+                    id:1
+                }
             }
         },
         watch: {
             isLoading() {
                 if (this.isLoading) {
-                    setTimeout(() => {
-                        this.isLoading = false;
-                        this.count++;
-                    }, 500);
+                    this.render();
                 }
             }
         },
         methods:{
+            render(){
+                getLive(this.query).then(rep=>{
+                    this.data = rep.data;
+                    this.isLoading = false;
 
+                })
+            },
+            onOpenLive(room){
+                api.openWin({
+                    name: 'test',
+                    url:getPath() + '/html/index.html?path=radio-live',
+                    pageParam:{
+                        room:room
+                    }
+                });
+            }
         },
         components:{
             PullTo
+        },
+        mounted(){
+            let tab = document.getElementById("live-tab");
+            let pd =  this.paddingTop?this.paddingTop.replace("px",''):0;
+            document.getElementById("live-content").style.top = parseInt(pd) + tab.clientHeight + 'px';
+
+            this.render();
         }
     }
 </script>
