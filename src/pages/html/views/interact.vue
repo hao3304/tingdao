@@ -2,7 +2,8 @@
     <div class="view-interact">
         <van-nav-bar :style="{paddingTop:paddingTop}" id="header" :title="video.name" @click-right="onShowLive" @click-left="onShowList" >
       <span slot="right" class="header-button" >
-          <img src="../../../assets/images/btn_live_OFF@3x.png" alt="">
+          <img v-show="!video.live" src="../../../assets/images/btn_live_OFF@3x.png" alt="">
+          <img v-show="video.live == 1" src="../../../assets/images/btn_live_ON@3x.png" alt="">
       </span>
             <span slot="left" class="header-button"  >
                 <img src="../../../assets/images/ico_navbar_menu@3x.png" alt="">
@@ -49,6 +50,9 @@
             </section>
         </div>
 
+        <span @click="onGetHongBao" class="hongbao" v-if="lucky.id">
+            <img src="../../../assets/images/hongbao.png" alt="">
+        </span>
 
         <div class="speech-modal" v-show="speech">
 
@@ -98,7 +102,7 @@
 
 <script>
     //    var speech = api.require('speechRecognizer');
-    import {getDefaultFm,getVideoDetail,src, base ,postVoice,getPath,getPush} from '../index/services';
+    import {getDefaultFm,getVideoDetail,getLiveStatus,src, base ,postVoice,getPath,getPush} from '../index/services';
     import { Toast } from 'vant';
     import vDialog from '../components/vDialog.vue';
     export default {
@@ -133,7 +137,11 @@
                     "brief": "",
                     "show_time": 0
                 },
-                src:src
+                src:src,
+                hbModal: false,
+                lucky:{
+                    id:null
+                }
             }
         },
         components:{
@@ -216,19 +224,28 @@
                 });
             },
             playVideo(path){
-                var audio = api.require('audio');
-                this.fm_playing = false;
+//                var audio = api.require('audio');
+//                this.fm_playing = false;
+//                Toast.loading({ mask: false });
+//                audio.stop();
+//                audio.play({
+//                    path:path
+//                }, function(ret, err) {
+//                    Toast.clear();
+//                });
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.stop();
                 Toast.loading({ mask: false });
-                audio.stop();
-                audio.play({
-                    path:path
-                }, function(ret, err) {
+                audioPlayer.initPlayer({
+                    path: path,
+                    cache: false
+                }, function(ret) {
                     Toast.clear();
                 });
             },
             pauseVideo(){
-                var audio = api.require('audio');
-                audio.stop();
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.stop();
             },
             onPlay(){
                 this.interact_status = this.interact_status == 'pause'?'play':'pause';
@@ -238,10 +255,20 @@
                     Toast.clear();
                     this.video = rep;
                     this.onPlay();
+                    this.getLive(id);
                 })
             },
+            getLive(id) {
+                if(this.timer) {
+                    clearInterval(this.timer);
+                }
+                this.timer = setInterval(()=>{
+                    getLiveStatus(id).then(rep=>{
+                        this.video.live = rep.stat;
+                    })
+                },10000)
+            },
             onText(){
-
                 api.openWin({
                     name: 'test',
                     url:getPath() + '/html/index.html?path=textarea',
@@ -264,16 +291,42 @@
                 });
             },
             onShowLive(){
+                if(this.video.live == 1) {
+                    this.interact_status = 'play';
+                    this.fm_playing = false;
+                    Toast.loading();
+                    getLiveStatus(this.video.id).then(room=>{
+                        Toast.clear();
+                        api.openWin({
+                            name: 'test',
+                            url:getPath() + '/html/index.html?path=radio-live',
+                            pageParam:{
+                                session:{
+                                    roomId: room.roomId,
+                                    password: room.userPwd,
+                                    nickname: room.roomName
+                                }
+                            }
+                        });
+                    })
+                }
+            },
+            onGetHongBao() {
+                this.interact_status = 'play';
                 api.openWin({
-                    name: 'test',
-                    url:getPath() + '/html/index.html?path=radio-live'
-
+                    name: '抢红包',
+                    url:getPath() + '/html/index.html?path=hongbao',
+                    pageParam:{
+                        id: this.lucky.id
+                    },
                 });
+
+                this.lucky.id = "";
             }
         },
         watch:{
             speech(b){
-                var audio = api.require('audio');
+                var audio = api.require('audioPlayer');
                 if(b) {
                     if(this.interact_status == 'pause') {
                         audio.pause();
@@ -293,15 +346,23 @@
             }
         },
         mounted(){
-            var audio = api.require('audio');
+            var audio = api.require('audioPlayer');
             var push = api.require('push');
             push.setListener(( ret, err )=>{
                 if( ret ){
-                    let id = ret.data[0];
-                    getPush(id).then(rep=>{
-                        this.pushInfo = rep;
-                        this.dialog = true;
-                    })
+
+                    let content = ret.data[0].split(',');
+                    let type = content[0], id = content[1];
+
+                    if(type == 1) {
+                        getPush(id).then(rep=>{
+                            this.pushInfo = rep;
+                            this.dialog = true;
+                        })
+                    }else{
+                        this.lucky.id = id;
+                    }
+
                 }
             });
             Toast.loading({ mask: false });
@@ -483,7 +544,7 @@
             }
         }
 
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border-width: 0;
         }
         .main{
@@ -671,6 +732,19 @@
 
             }
         }
+
+        .hongbao{
+            position: absolute;
+            top:px2rem(200);
+            right: px2rem(25);
+            img{
+                width: px2rem(120);
+                box-shadow: px2rem(2) px2rem(2) px2rem(4) rgba(0,0,0,.3);
+                border-radius: px2rem(20);
+            }
+        }
+
+
     }
 
 </style>

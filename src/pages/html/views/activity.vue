@@ -6,8 +6,8 @@
         <div class="content">
             <van-pull-refresh style="height: 100%" v-model="isLoading">
             <ul class="list">
-                <li class="item" v-for="l in list">
-                    <a href="#" v-ripple>
+                <li class="item" v-for="l in list" @click="onSelect(l)">
+                    <a href="javascript:;" v-ripple>
 
                         <div class="left">
                             <h5>{{l.title}}</h5>
@@ -21,6 +21,23 @@
             </ul>
             </van-pull-refresh>
         </div>
+
+        <vDialog v-model="dialog"
+                 :type="pushInfo.type"
+                 :time="pushInfo.show_time"
+                 :url="pushInfo.url"
+                 :id="pushInfo.id"
+        >
+            <div slot="title">
+                {{pushInfo.title}}
+            </div>
+            <span slot="body">
+                <img class="pull-info-img" style="width: 100%" :src="src+ pushInfo.img" alt="">
+                <p>
+                    {{pushInfo.brief}}
+                </p>
+            </span>
+        </vDialog>
     </div>
 </template>
 <style lang="sass" type="text/scss" >
@@ -28,11 +45,11 @@
     .activity-list{
         height: 100%;
         overflow-y: hidden;
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
 
-        .content{
+        >.content{
             overflow: hidden;
             padding-bottom: px2rem(188);
             padding-left: px2rem(40);
@@ -96,13 +113,16 @@
     import PullTo from 'vue-pull-to';
     import {getActivity,src} from '../index/services';
     import { Toast } from 'vant';
+    import vDialog from '../components/vDialog.vue';
     export default {
         store:['paddingTop'],
         data(){
             return {
                 list:[],
                 src:src,
-                isLoading:false
+                isLoading:false,
+                pushInfo:{},
+                dialog:false
             }
         },
         methods:{
@@ -115,8 +135,8 @@
                 api.closeWin();
             },
             onSelect(node){
-                this.$ls.set("currentId",node.id);
-                this.onClickLeft();
+                this.pushInfo = node;
+                this.dialog = true;
             }
         },
         watch: {
@@ -130,7 +150,8 @@
             }
         },
         components:{
-            PullTo
+            PullTo,
+            vDialog
         },
         mounted(){
             getActivity({id:1||api.pageParam.id}).then( (rep) =>{

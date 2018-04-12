@@ -1,6 +1,6 @@
 <template>
     <div class="v-dialog" v-show="show">
-        <transition name="zoom">
+        <transition name="fade">
             <div class="content" v-show="show">
                 <a href="#" class="close-btn"  @click="onClose">
                     <i class="iconfont icon-guanbi"></i>

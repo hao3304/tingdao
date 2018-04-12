@@ -1,34 +1,48 @@
 <template>
     <div class="my-activity-list">
-        <van-nav-bar :style="{paddingTop:paddingTop}" id="header" @click-left="onClickLeft"  left-arrow title="我参与的"  >
-
+        <van-nav-bar style="position: fixed;top:0;width: 100%;left: 0;" :style="{paddingTop:paddingTop}" id="header" @click-left="onClickLeft"  left-arrow title="我参与的"  >
         </van-nav-bar>
-        <div class="content">
-            <van-pull-refresh style="height: 100%" v-model="isLoading">
-                <ul class="list">
-                    <li class="item" v-for="l in list">
-                        <a href="#" v-ripple>
+        <!--<div class="content">-->
+        <!--&lt;!&ndash;<van-list>&ndash;&gt;-->
 
-                            <div class="left">
-                                <h5>{{l.title}}</h5>
-                                <p>{{l.type == 0?'已结束':'正在进行中'}}</p>
-                            </div>
-                            <div class="right">
-                                <van-icon name="arrow"></van-icon>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
+        <!--&lt;!&ndash;</van-list>&ndash;&gt;-->
+        <!--&lt;!&ndash;<van-pull-refresh  v-model="isLoading">&ndash;&gt;-->
+        <!---->
+        <!--&lt;!&ndash;</van-pull-refresh>&ndash;&gt;-->
+        <!--</div>-->
+        <div class="content" :style="{paddingTop:paddingTop}" >
+            <van-pull-refresh   v-model="refreshing" @refresh="onRefresh">
+                <van-list
+                        v-model="loading"
+                        :finished="finished"
+                        @load="onLoad"
+                >
+                    <ul class="list">
+                        <li class="item" v-for="l in list">
+                            <a href="#">
+
+                                <div class="left">
+                                    <h5>{{l.title}}</h5>
+                                    <p>{{l.type == 0?'已结束':'正在进行中'}}</p>
+                                </div>
+                                <div class="right">
+                                    <van-icon name="arrow"></van-icon>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </van-list>
             </van-pull-refresh>
         </div>
+
+
     </div>
 </template>
 <style lang="sass" type="text/scss" >
     @import "../../../public/px2rem.scss";
     .my-activity-list{
         height: 100%;
-        overflow-y: hidden;
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
 
@@ -37,11 +51,9 @@
         }
 
         .content{
-            overflow: hidden;
-            padding-bottom: px2rem(188);
             padding-left: px2rem(40);
             padding-right: px2rem(40);
-            height: 100%;
+            margin-top: px2rem(88);
             .van-pull-refresh__track{
                 height: 100%;
             }
@@ -53,7 +65,7 @@
                     background-color: #ffffff;
                     box-shadow: 0 px2rem(20) px2rem(50) 0
                     rgba(0, 0, 0, 0.1);
-                    border-right:px2rem(1) solid rgba(0,0,0,.1);
+                    border-right:px2rem(1) solid #f1f1f1;
                     margin-bottom: px2rem(20);
                     padding: 0 px2rem(40);
                     border-left: px2rem(8) solid #ffd164;
@@ -101,26 +113,40 @@
     import {getMyActivity,src} from '../index/services';
     import { Toast } from 'vant';
     export default {
-        store:['paddingTop'],
+        store:['paddingTop','token'],
         data(){
             return {
                 list:[],
                 src:src,
-                isLoading:false
+                refreshing: false,
+                loading: false,
+                finished: false,
+                query:{
+                    page:1
+                }
             }
         },
         methods:{
-            refresh(loaded){
-                setTimeout(()=>{
-                    loaded('done');
-                },2000)
-            },
             onClickLeft(){
                 api.closeWin();
             },
             onSelect(node){
                 this.$ls.set("currentId",node.id);
                 this.onClickLeft();
+            },
+            onLoad() {
+                getMyActivity({token: this.token}).then((rep) =>{
+                    this.list = rep;
+                    this.loading = false;
+                })
+            },
+            onRefresh() {
+               setTimeout(()=>{
+                   this.finished = false;
+                   this.refreshing = false;
+                   window.scrollTo(0, 10);
+               },1000)
+
             }
         },
         watch: {
@@ -137,9 +163,7 @@
             PullTo
         },
         mounted(){
-            getMyActivity({id:1||api.pageParam.id}).then( (rep) =>{
-                this.list = rep.data;
-            })
+
         }
     }
 </script>

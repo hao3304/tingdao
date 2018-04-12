@@ -22,7 +22,7 @@
     .view-list{
         height: 100%;
         overflow-y: hidden;
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
         .tab{

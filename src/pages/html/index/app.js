@@ -72,8 +72,8 @@ window.apiready = function() {
                 token:'',
                 paddingTop:api.systemType=='ios'?'20px':'25px',
                 interact_status:'play',
-                fm_playing:false
-
+                fm_playing:false,
+                fm_list:[]
             }
         },
         template:`
@@ -82,6 +82,11 @@ window.apiready = function() {
         created(){
             if(this.$ls.get("token")) {
                 this.store.token = this.$ls.get("token");
+
+                if(!this.store.token) {
+                    return this.$router.push('/login');
+                }
+
                 var path = GetQueryString('path');
                 if(path){
                     this.$router.replace('/'+path);

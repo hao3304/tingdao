@@ -5,8 +5,9 @@ const ip = 'http://39.106.219.227';
 
 export const base = `${ip}/api`;
 export const src =`${ip}/static/upload/`;
-export const fmSrc =`${ip}/static/audio/`;
-const path = 'dev';
+export const fmSrc =`${ip}/audio/`;
+
+const path = 'prod';
 
 export const getPath = ()=>{
     if(path == 'dev') {
@@ -15,6 +16,7 @@ export const getPath = ()=>{
         return api.wgtRootDir +'/dist';
     }
 }
+
 
 var instance = axios.create({
     baseURL: base,
@@ -51,6 +53,13 @@ export const getDefaultFm = (params)=>instance.get('/radio/default',{params});
 export const setDefalutFm = params =>instance.post('/radio/default',params);
 
 export const getLive = params=>instance.get('/radio/live',{params});
+export const getLiveStatus = id=>instance.get(`/radio/live/radio?id=${id}`);
 
 export const putMy = (token,params) => instance.put(`/member/${token}`,params);
 export const uploadPic = (params) => instance.post(`/radio/voice/upload/pic`,params);
+export const uploadFile = (params) => instance.post(`/radio/voice/upload/file`,params);
+export const delPrograms = (params) => instance.post(`/radio/delPrograms`,params);
+export const postLucky = (params) => instance.post(`/radio/lucky`,params);
+
+export const getLucky = id =>instance.get(`/radio/lucky/${id}`);
+

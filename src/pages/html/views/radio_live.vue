@@ -3,23 +3,25 @@
     </div>
 </template>
 <script>
+    import { getPath } from '../index/services';
     export default {
         data(){
             return {
                 show:false,
-                url:''
+                url:'',
+                session:{
+                    roomId:'',
+                    password:'',
+                    nickname:''
+                }
             }
         },
         methods:{
             render(){
                 var player = api.require('gotyeLivePlayer');
-                var session = {
-                    roomId: '2254356',
-                    password: '333',
-                    nickname: 'goal'
-                };
+
                 player.init({
-                    session:session
+                    session:this.session
                 });
                 player.play({playView: "frm_mine"});
 
@@ -32,11 +34,13 @@
                 });
             }
         },
+        created(){
+           this.session = api.pageParam.session;
+        },
         mounted(){
-
             api.openFrame({
                 name: 'frm_mine',
-                url: '/src/pages/public/win/app.html',
+                url: getPath() + '/public/win.html',
                 rect: {
                     x: 0,
                     y: 0,
@@ -52,12 +56,7 @@
                 enabled: true
             });
 
-            var session = {
-                roomId: '2254356',
-                password: '333',
-                nickname: 'goal'
-            };
-            core.authRoomSession(session, ( ret, err )=>{
+            core.authRoomSession(this.session, ( ret, err )=>{
                 if( ret ){
                     this.render();
                 }else{

@@ -46,10 +46,10 @@
             </section>
             <section class="other-block">
                 <van-cell-group>
-                    <van-cell value=""  isLink>
+                    <van-cell value="" @click="onShowWallet"  isLink>
                         <template slot="title">
                         <span class="van-cell-text">
-                            意见反馈
+                            我的钱包
                         </span>
                         </template>
                     </van-cell>
@@ -81,6 +81,9 @@
     #view-my{
         height: 100%;
         .van-hairline--top-bottom::after{
+            border-width: 0;
+        }
+        .van-hairline--bottom::after{
             border-width: 0;
         }
         .container{
@@ -235,10 +238,7 @@
                 if(v) {
                     api.openWin({
                         name: 'my-activity',
-                        url: getPath() + '/html/index.html?path=my-activity',
-                        pageParam:{
-                            name:'test'
-                        }
+                        url: getPath() + '/html/index.html?path=my-activity'
                     });
                 }
             },
@@ -285,6 +285,12 @@
                 api.openWin({
                     name: 'config',
                     url: getPath() + '/html/index.html?path=config',
+                });
+            },
+            onShowWallet() {
+                api.openWin({
+                    name: 'config',
+                    url: getPath() + '/html/index.html?path=wallet',
                 });
             }
         },

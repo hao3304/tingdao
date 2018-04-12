@@ -1,5 +1,5 @@
 <template>
-    <div class="my-activity-list">
+    <div class="my-fm-list">
         <van-nav-bar :style="{paddingTop:paddingTop}" id="header" @click-left="onClickLeft"  left-arrow title="我参与的"  >
 
         </van-nav-bar>
@@ -25,10 +25,10 @@
 </template>
 <style lang="sass" type="text/scss" >
     @import "../../../public/px2rem.scss";
-    .my-activity-list{
+    .my-fm-list{
         height: 100%;
         overflow-y: hidden;
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
 

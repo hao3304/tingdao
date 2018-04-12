@@ -8,13 +8,13 @@
         </van-nav-bar>
         <div class="container">
             <swiper  :options="swiperOption" ref="mySwiper">
-                <swiper-slide v-for="(n,index) in list">
+                <swiper-slide v-for="(n,index) in fm_list">
                     <div class="content" :style="{backgroundImage:'url('+ src + n.img +')'}">
                         <div class="toolbar">
-                            <a href="#">
+                            <a href="javascript:;">
                                 <!--<img src="../../../assets/images/ico_like@3x.png" alt="">-->
                             </a>
-                            <a href="#" >
+                            <a href="javascript:;" @click="onRemove(n.id,index)" >
                                 <img  src="../../../assets/images/ico_del_W@3x.png"  alt="">
                             </a>
                         </div>
@@ -57,16 +57,10 @@
     </div>
 </template>
 <script>
-    import {getVideo,src,fmSrc,getPath} from '../index/services';
-    import { Toast } from 'vant';
+    import {getVideo,src,delPrograms,fmSrc,getPath} from '../index/services';
+    import { Toast,Dialog } from 'vant';
     export default {
-        store:['paddingTop','token','interact_status','fm_playing'],
-        props:{
-            list:{
-                type:Array,
-                default:[]
-            }
-        },
+        store:['paddingTop','token','interact_status','fm_playing','fm_list'],
         data(){
             let active = this.$ls.get('fm_active',0);
             return {
@@ -122,65 +116,56 @@
                 this.fm_playing = !this.fm_playing;
             },
             onPlayer(){
-                const audio = api.require('audio');
+                const audio = api.require('audioPlayer');
 
                 this.interact_status = 'play';
-                setTimeout(()=>{
-                    audio.play({
-                        path: fmSrc + this.info.audio_link
-                    }, (ret, err) =>{
-                        if(!err){
+
+                audio.getState(({state})=>{
+                    if(state == 'paused') {
+                        audio.play();
+                    }else{
+                        audio.initPlayer({
+                            path: fmSrc + this.info.audio_link,
+                            cache: false
+                        }, (ret, err) =>{
                             this.duration = new Date(ret.duration*1000).Format('mm:ss');
+//                            this.current = new Date(ret.current*1000).Format('mm:ss');
+//                        else{
+//                            this.stopPlay();
+//                            this.onPlayer();
+//                        }
+                        });
+
+                        audio.removeEventListener({name:'playing'})
+                        audio.addEventListener({name:'playing'},(ret)=>{
                             this.current = new Date(ret.current*1000).Format('mm:ss');
-                        }else{
-                            this.stopPlay();
-                            this.onPlayer();
-                        }
-                    });
-                },1)
-//                this.fm_playing = true;
-//                var audio = api.require('audio');
-//                if(this.fm_playing) {
-//                    audio.pause();
-//                }else{
-//                    this.interact_status = 'play';
-//                   setTimeout(()=>{
-//                       audio.play({
-//                           path: fmSrc + this.info.audio_link
-//                       }, (ret, err) =>{
-//                           if(!err){
-//                               this.duration = new Date(ret.duration*1000).Format('mm:ss');
-//                               this.current = new Date(ret.current*1000).Format('mm:ss');
-//                           }else{
-//                               this.stopPlay();
-//                               this.onPlayer();
-//                           }
-//                       });
-//                   },1)
-//                }
-//                this.fm_playing = !this.fm_playing;
+                        })
+
+                    }
+
+                })
+
 
             },
             pausePlay(){
-                const audio = api.require('audio');
+                const audio = api.require('audioPlayer');
                 audio.pause();
             },
             stopPlay(){
-                const audio = api.require('audio');
-
+                const audio = api.require('audioPlayer');
                 this.current = '00:00';
                 this.duration = '00:00';
                 audio.stop();
             },
-            render(){
-                Toast.loading();
-                getVideo({token:this.token}).then( (rep)=>{
-                    this.list = rep;
-                    this.info = this.list[this.active];
-                    this.swiper.slideTo(this.active);
-                    Toast.clear();
-                })
-            },
+//            render(){
+//                Toast.loading();
+//                getVideo({token:this.token}).then( (rep)=>{
+//                    this.list = rep;
+//                    this.info = this.list[this.active];
+//                    this.swiper.slideTo(this.active);
+//                    Toast.clear();
+//                })
+//            },
             onNext(){
                 this.swiper.slideNext();
                 this.onChange();
@@ -191,7 +176,7 @@
             },
             onChange(){
                 setTimeout(()=>{
-                    this.info = this.list[this.swiper.activeIndex];
+                    this.info = this.fm_list[this.swiper.activeIndex];
                     this.active = this.swiper.activeIndex;
                     this.stopPlay();
 //                    this.fm_playing = false;
@@ -210,15 +195,50 @@
             },
             onShowList() {
                 this.stopPlay();
+                this.fm_playing = false;
+//                this.$router.push('/fm-list');
                 api.openWin({
                     name: 'fm-list',
                     url: getPath() + '/html/index.html?path=fm-list'
                 });
+            },
+            onRemove(id,index){
+                Dialog.confirm({
+                    title: '提示',
+                    message: '确定删除您所选的节目吗？'
+                }).then(() => {
+                    Dialog.close();
+                    Toast.loading();
+                    delPrograms({token:this.token,programIds:[id]}).then(rep=>{
+                        Toast.clear();
+                        this.fm_list = this.fm_list.filter(l=>l.id != id);
+                        if(this.active >= this.fm_list.length && this.fm_list.length != 0) {
+                            this.active =  this.fm_list.length - 1;
+                        }
+                        if(this.fm_list.length != 0) {
+                            this.info = this.fm_list[this.active];
+                        }else{
+                            this.$emit('reload')
+
+                        }
+                        this.stopPlay();
+                        this.fm_playing = false;
+                        api.toast({msg:"删除成功~"});
+                    })
+
+                }).catch(() => {
+                    // on cancel
+                });
             }
         },
         mounted(){
-            if(this.list&&this.list.length>0) {
-                this.info = this.list[this.active];
+            if(this.fm_list&&this.fm_list.length>0) {
+
+                if(this.active >= this.fm_list.length) {
+                    this.active = this.fm_list.length - 1;
+                }
+
+                this.info = this.fm_list[this.active];
                 this.swiper.slideTo(this.active);
             }
         },
@@ -243,7 +263,7 @@
                 height:px2rem(56);
             }
         }
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border-width: 0;
         }
         .container{

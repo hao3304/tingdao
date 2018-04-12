@@ -39,7 +39,7 @@
                 color: #777777;
             }
 
-            .van-hairline--top-bottom::after{
+            .van-hairline--bottom::after{
                 border-width: 0;
             }
             .row{

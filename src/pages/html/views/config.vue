@@ -7,7 +7,7 @@
 
             <div class="row">
                 <van-uploader  accept="image/png, image/jpeg" :after-read="onRead" style="width: 100%">
-                <div class=" t-cell van-cell-group van-hairline--top-bottom"><div class="van-cell van-hairline">
+                <div class=" t-cell van-cell-group van-hairline--bottom"><div class="van-cell van-hairline">
                     <div class="van-cell__title">
                         <!----><span class="van-cell__text">头像</span><!----></div><!---->
                     <div class="van-cell__value van-cell__value--link">
@@ -33,7 +33,7 @@
         height: 100%;
         background-color: #f2f2f2;
         overflow-y: hidden;
-        .van-hairline--bottom::after, .van-hairline--left::after, .van-hairline--right::after, .van-hairline--surround::after, .van-hairline--top-bottom::after, .van-hairline--top::after, .van-hairline::after{
+        .van-hairline--bottom::after, .van-hairline--left::after, .van-hairline--right::after, .van-hairline--surround::after, .van-hairline--bottom::after, .van-hairline--top::after, .van-hairline::after{
             border-width: 0;
         }
 

@@ -9,11 +9,11 @@
 
         </van-nav-bar>
         <div class="edit-toolbar" v-show="editable">
-            <div class="circle">
-                <van-icon name="check"></van-icon>
+            <div class="circle" @click="onSelectAll">
+                <van-icon :name="selectAll?'checked':'check'"></van-icon>
             </div>
             <div class="btns">
-                <a href="javascript:;" class="btn-remove">
+                <a href="javascript:;" class="btn-remove" @click="onRemove">
                         <van-icon name="delete"></van-icon>
                     删除</a>
                 <a href="javascript:;" @click="onSave" class="btn-ok">完成</a>
@@ -21,7 +21,7 @@
         </div>
         <div class="content">
                 <ul class="list">
-                    <li class="item" v-for="(l,index) in list" @click="onSelect(l.id)" >
+                    <li class="item" v-for="(l,index) in fm_list" @click="onSelect(l.id)" >
                         <div class="index">
                             <span v-show="!editable">{{index +1}}</span>
                             <van-icon v-show="editable" :name="hasSelect(l.id)?'checked':'check'"></van-icon>
@@ -44,7 +44,7 @@
     .my-fm-list{
         height: 100%;
         overflow-y: hidden;
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
 
@@ -208,17 +208,17 @@
 
 </style>
 <script>
-    import {getVideo,src} from '../index/services';
-    import { Toast } from 'vant';
+    import {getVideo,src,delPrograms} from '../index/services';
+    import { Toast,Dialog } from 'vant';
     export default {
-        store:['paddingTop','token'],
+        store:['paddingTop','token','fm_list'],
         data(){
             return {
-                list:[],
                 src:src,
                 select:[],
                 isLoading:false,
-                editable:false
+                editable:false,
+                selectAll:false
             }
         },
         methods:{
@@ -229,6 +229,7 @@
             },
             onClickLeft(){
                 api.closeWin();
+//                window.history.back();
             },
             hasSelect(id) {
                 return this.select.findIndex(s=>s==id)>-1;
@@ -241,11 +242,23 @@
                         this.select = this.select.filter(s=>s!=id);
                     }
                 }
+                this.selectAll = false;
+            },
+            onSelectAll(){
+                if(!this.selectAll) {
+                    this.select = this.fm_list.map(l=>l.id);
+                }else{
+                    this.select = [];
+                }
+                this.selectAll = !this.selectAll;
             },
             render(){
                 Toast.loading();
+                this.select = [];
+                this.editable = false;
+                this.selectAll = false;
                 getVideo({token:this.token}).then( (rep)=>{
-                    this.list = rep;
+                    this.fm_list = rep;
                     Toast.clear();
                 })
             },
@@ -261,6 +274,32 @@
                 }else{
                     this.$router.push('/openfm?type=select');
                 }
+            },
+            onRemove() {
+                if(this.select.length >0 ) {
+                    Dialog.confirm({
+                        title: '提示',
+                        message: '确定删除您所选的节目吗？'
+                    }).then(() => {
+
+                        Dialog.close();
+                        Toast.loading();
+
+                        delPrograms({token:this.token,programIds:this.select}).then(rep=>{
+                            Toast.clear();
+                            api.toast({msg:"删除成功~"});
+                            this.render();
+                            this.$ls.set("refresh",new Date().valueOf());
+                        })
+
+
+                    }).catch(() => {
+                        // on cancel
+                    });
+                }else{
+                    api.toast({msg:"您什么都没有选取~"});
+                }
+
             }
         },
         watch: {

@@ -15,6 +15,8 @@ import radio_live from '../views/radio_live.vue';
 import edit from '../views/edit.vue';
 import fm_list from '../views/fm_list.vue';
 import openfm from '../views/openfm.vue';
+import wallet from '../views/wallet.vue';
+import hongbao from '../views/hongbao.vue';
 
 
 export default  [
@@ -67,5 +69,11 @@ export default  [
     },
     {
         path:'/openfm',component:openfm
+    },
+    {
+        path:'/wallet',component:wallet
+    },
+    {
+        path:'/hongbao',component:hongbao
     }
 ]

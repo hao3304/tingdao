@@ -24,6 +24,11 @@
                 </a>
             </div>
         </div>
+
+        <div class="div-title">
+            <p>社交账号登录</p>
+        </div>
+
         <van-button class="login-btn" @click="onLogin" bottom-action>登录</van-button>
     </div>
 </template>
@@ -61,37 +66,36 @@
                     return;
                 }
 
-
-//                Toast.loading({
-//                    forbidClick: true
-//                });
-//                var push = api.require('push');
-//                login(this.form).then(rep=>{
-//                    if(rep) {
-//                        this.$ls.set("token",rep.token);
-//                        this.$ls.set("userName",rep.userName);
-//                        this.$ls.set("userId",rep.userId);
-//                        this.token = rep.token;
-//                        push.bind({
-//                            userName: rep.userName,
-//                            userId: rep.userId
-//                        },(ret)=>{
-//                            Toast.clear();
-//                            this.$router.push('/app');
-//                        });
-//                    }
-//                })
-
+                Toast.loading({
+                    forbidClick: true
+                });
+                var push = api.require('push');
                 login(this.form).then(rep=>{
                     if(rep) {
                         this.$ls.set("token",rep.token);
                         this.$ls.set("userName",rep.userName);
                         this.$ls.set("userId",rep.userId);
                         this.token = rep.token;
-                        Toast.clear();
-                        this.$router.push('/app');
+                        push.bind({
+                            userName: rep.userName,
+                            userId: rep.userId
+                        },(ret)=>{
+                            Toast.clear();
+                            this.$router.push('/app');
+                        });
                     }
                 })
+
+//                login(this.form).then(rep=>{
+//                    if(rep) {
+//                        this.$ls.set("token",rep.token);
+//                        this.$ls.set("userName",rep.userName);
+//                        this.$ls.set("userId",rep.userId);
+//                        this.token = rep.token;
+//                        Toast.clear();
+//                        this.$router.push('/app');
+//                    }
+//                })
 
             },
             onGetCode() {
@@ -119,7 +123,7 @@
             background-color: #fce76c;
 
         }
-        .van-hairline--top-bottom::after{
+        .van-hairline--bottom::after{
             border: none;
         }
         .bg-block{
@@ -148,7 +152,7 @@
                 padding-right: px2rem(168);
                 position:relative;
 
-                .van-hairline--bottom::after, .van-hairline--left::after, .van-hairline--right::after, .van-hairline--surround::after, .van-hairline--top-bottom::after, .van-hairline--top::after, .van-hairline::after{
+                .van-hairline--bottom::after, .van-hairline--left::after, .van-hairline--right::after, .van-hairline--surround::after, .van-hairline--bottom::after, .van-hairline--top::after, .van-hairline::after{
                     border-bottom-width:0;
                 }
 
@@ -181,6 +185,15 @@
             left: 0;
             right: 0;
             background-color: #262628;
+        }
+
+        .div-title{
+            margin-top: px2rem(250);
+            p{
+                font-size: px2rem(26);
+                text-align: center;
+                color: #777;
+            }
         }
     }
 </style>

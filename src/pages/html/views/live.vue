@@ -102,9 +102,9 @@
 </style>
 <script>
     import PullTo from 'vue-pull-to';
-    import { getLive,src } from '../index/services';
+    import { getLive,src,getPath } from '../index/services';
     export default {
-        store:['paddingTop'],
+        store:['paddingTop','interact_status','fm_playing'],
         data(){
             return {
                 isLoading:false,
@@ -133,13 +133,23 @@
                 })
             },
             onOpenLive(room){
-                api.openWin({
-                    name: 'test',
-                    url:getPath() + '/html/index.html?path=radio-live',
-                    pageParam:{
-                        room:room
-                    }
-                });
+                this.interact_status = 'play';
+                this.fm_playing = false;
+                if(room.stat == 1) {
+                    api.openWin({
+                        name: 'test',
+                        url:getPath() + '/html/index.html?path=radio-live',
+                        pageParam:{
+                            session:{
+                                roomId: room.roomId,
+                                password: room.userPwd,
+                                nickname: room.roomName
+                            }
+                        }
+                    });
+                }else{
+                    api.toast({msg:"主播还在路上~"})
+                }
             }
         },
         components:{
